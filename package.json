@@ -1,0 +1,16 @@
+{
+  "name": "hero-wot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Syed Aslam <aslam.maqsood@gmail.com> (https://syedaslam.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "4.21.1",
+    "pg": "8.13.0"
+  }
+}
