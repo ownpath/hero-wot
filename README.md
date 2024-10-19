@@ -9,12 +9,4 @@ This repository contains both the frontend and backend code for the Hero-WOT pro
 
 ## Getting Started
 
-[Add instructions on how to set up and run your project]
-
-## Contributing
-
-[Add guidelines for contributing to your project]
-
-## License
-
-[Add your license information]
+Instructions on how to run are mentioned in the README of each folder.

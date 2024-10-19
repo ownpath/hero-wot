@@ -221,7 +221,7 @@ export default function BirthdayGreetingsForm() {
       const postData = {
         title,
         body: greetings,
-        userId: 10,
+        userId: 15,
         status: "processing",
         score: null,
         media: media,
