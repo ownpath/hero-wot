@@ -1,4 +1,71 @@
 ````markdown
+# Express.js Server Guide
+
+This README provides instructions on how to set up an Express.js server locally and set up your database schema using two different methods: Sequelize migrations and raw SQL files.
+
+## Table of Contents
+
+1. [Setting Up Express.js Server](#setting-up-expressjs-server)
+
+## Setting Up Express.js Server
+
+### Prerequisites
+
+- Node.js and npm installed on your machine
+- Git installed (optional, for cloning the repository)
+
+### Steps to Set Up and Run Express Server
+
+1. Clone the repository (if you haven't already):
+   ```bash
+   git clone <your-repository-url>
+   cd <your-project-directory>
+   ```
+````
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory and add necessary environment variables:
+
+   ```
+   PORT=8080
+   DATABASE_URL=postgres://username:password@localhost:5432/your_database_name
+   ```
+
+4. Start the server:
+
+   ```bash
+   npm start
+   ```
+
+   If you have a development script, you can use:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Your server should now be running on `http://localhost:8080` (or whatever port you specified in the .env file).
+
+### Testing the Server
+
+To ensure your server is running correctly, you can:
+
+1. Open a web browser and navigate to `http://localhost:8080`
+2. Use a tool like cURL or Postman to send requests to your API endpoints
+
+Example cURL command:
+
+```bash
+curl http://localhost:8080
+```
+
+If everything is set up correctly, you should see a response from your server.
+
+````markdown
 # Database Setup Guide
 
 This README provides instructions on how to set up your database schema using two different methods: Sequelize migrations with Express.js and raw SQL files.
@@ -244,7 +311,4 @@ Remember to always backup your database before making significant changes or run
 
 ```
 
-This combined README provides a comprehensive guide for setting up your database schema using either Sequelize migrations with Express.js or raw SQL files. Users can choose the method that best fits their needs and development workflow.
-
-You can copy this entire block of text and paste it directly into your README.md file. The formatting will be preserved, including headers, code blocks, and links.
 ```
