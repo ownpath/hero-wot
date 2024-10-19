@@ -1,7 +1,3 @@
-Certainly! I'll create a combined README.md that includes both methods - using Sequelize migrations and using raw SQL files - as different sections. This will provide a comprehensive guide for setting up the database schema using either approach.
-
-Here's the combined README content that you can copy and paste directly into your README.md file:
-
 ````markdown
 # Database Setup Guide
 
