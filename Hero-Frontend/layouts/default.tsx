@@ -13,12 +13,9 @@ export default function DefaultLayout({
       <div className="w-full max-w-8xl mx-auto px-6 pt-4">
         <Navbar />
       </div>
-      <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+      <main className="container mx-auto max-w-7xl px-6 flex-grow ">
         {children}
       </main>
-      <footer className="w-full flex items-center justify-center py-3">
-        {/* Footer content */}
-      </footer>
     </div>
   );
 }

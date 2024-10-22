@@ -37,9 +37,17 @@ const registerUser = async (userData: {
 }) => {
   try {
     const response = await api.post("/auth/register", userData);
-    return response.data;
+    // The backend will handle the redirect, so we don't need to process the response here
+    // We'll return true to indicate that the request was sent successfully
+    return true;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Registration failed");
+    // If there's a network error or the server responds with an error status
+    console.error("Registration error:", error);
+    if (error.response && error.response.data && error.response.data.error) {
+      throw new Error(error.response.data.error);
+    } else {
+      throw new Error("An error occurred during registration");
+    }
   }
 };
 
@@ -66,48 +74,19 @@ export default function LoginForm() {
     return validateEmail(email) ? false : true;
   }, [email]);
 
-  const isPasswordMatch = useMemo(() => {
-    if (password === "" || confirmPassword === "") return true;
-    return password === confirmPassword;
-  }, [password, confirmPassword]);
-
-  const togglePasswordVisibility = () =>
-    setIsPasswordVisible(!isPasswordVisible);
-  const toggleConfirmPasswordVisibility = () =>
-    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     try {
-      if (isSignup) {
-        if (password !== confirmPassword) {
-          setError("Passwords do not match");
-          setIsLoading(false);
-          return;
-        }
-        const userData = await registerUser({
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          password,
-        });
-        console.log("Registration successful:", userData);
-        // Optionally, log the user in automatically after registration
-        // or redirect to a "registration successful" page
-        router.push("/completeprofile");
-      } else {
-        const userData = await loginUser(email, password);
-        console.log("Login successful:", userData);
-        // Store the token in localStorage or a secure cookie
-        localStorage.setItem("token", userData.accessToken);
-        // Redirect to dashboard or home page
-        router.push("/completeprofile");
-      }
+      const response = await api.post("/auth/email-auth", { email });
+
+      // Redirect to your existing email verification page
+      router.push(response.data.redirectTo);
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      console.error("Authentication error:", err);
+      setError(err.response?.data?.error || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -119,149 +98,76 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-[350px]">
-      <CardHeader className="flex flex-col items-start px-6 pt-6 pb-0">
-        <h4 className="text-large font-bold">
-          {isSignup ? "Sign Up" : "Login"}
-        </h4>
-        <p className="text-small text-default-500">
-          {isSignup
-            ? "Create a new account"
-            : "Enter your email to login to your account"}
-        </p>
-      </CardHeader>
-      <CardBody className="px-6 py-4">
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {isSignup && (
-            <div className="flex gap-2">
+    <div className="min-h-screen w-full flex items-center justify-center">
+      <Card
+        className="w-full max-w-[573px] min-h-[740px] p-4 sm:p-8 md:p-11 bg-[#000000] rounded-[4px] border border-[#FFFFFF33] mx-auto items-center justify-center"
+        radius="none"
+      >
+        <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
+          <h1 className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+            Welcome
+          </h1>
+          <p className="w-full sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
+            Share your thoughts, wishes, or stories. You can write a message,
+            upload a photo, or even add a video to make it more personal.
+          </p>
+        </CardHeader>
+
+        <CardBody className=" items-center justify-center">
+          <div className="w-full sm:w-[364px] flex flex-col justify-center sm:mt-12">
+            <form
+              className="flex flex-col gap-4 sm:gap-6"
+              onSubmit={handleSubmit}
+            >
               <Input
-                label="First Name"
+                label="Email"
+                radius="sm"
                 labelPlacement="outside"
-                placeholder="John"
-                variant="bordered"
-                value={firstName}
-                onValueChange={setFirstName}
+                placeholder="Enter here"
+                type="email"
+                value={email}
+                onValueChange={setEmail}
+                classNames={{
+                  base: "max-w-full",
+                  label:
+                    "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
+                  input: "h-10 sm:h-[46px] bg-[#1C1C1C] text-white",
+                  inputWrapper:
+                    "h-10 sm:h-[46px] bg-[#1C1C1C] hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                }}
                 isRequired
               />
-              <Input
-                label="Last Name"
-                labelPlacement="outside"
-                placeholder="Doe"
-                variant="bordered"
-                value={lastName}
-                onValueChange={setLastName}
-                isRequired
-              />
-            </div>
-          )}
-          <Input
-            label="Email"
-            labelPlacement="outside"
-            placeholder="you@example.com"
-            type="email"
-            variant="bordered"
-            value={email}
-            onValueChange={setEmail}
-            isInvalid={isEmailInvalid}
-            color={isEmailInvalid ? "danger" : "default"}
-            errorMessage={isEmailInvalid && "Please enter a valid email"}
-            endContent={
-              <Mail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-            }
-            isRequired
-          />
-          <Input
-            label="Password"
-            labelPlacement="outside"
-            placeholder="Enter your password"
-            variant="bordered"
-            value={password}
-            onValueChange={setPassword}
-            endContent={
-              <button
-                className="focus:outline-none"
-                type="button"
-                onClick={togglePasswordVisibility}
-                aria-label="toggle password visibility"
+
+              {error && <p className="text-danger text-sm">{error}</p>}
+              <Button
+                type="submit"
+                className="mt-2 bg-[#EE2326] h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+                radius="none"
+                isLoading={isLoading}
               >
-                {isPasswordVisible ? (
-                  <EyeOff className="text-2xl text-default-400 pointer-events-none" />
-                ) : (
-                  <Eye className="text-2xl text-default-400 pointer-events-none" />
-                )}
-              </button>
-            }
-            type={isPasswordVisible ? "text" : "password"}
-            isRequired
-          />
-          {isSignup && (
-            <Input
-              label="Confirm Password"
-              labelPlacement="outside"
-              placeholder="Confirm your password"
-              variant="bordered"
-              value={confirmPassword}
-              onValueChange={setConfirmPassword}
-              isInvalid={!isPasswordMatch}
-              color={isPasswordMatch ? "default" : "danger"}
-              errorMessage={!isPasswordMatch && "Passwords do not match"}
-              endContent={
-                <button
-                  className="focus:outline-none"
-                  type="button"
-                  onClick={toggleConfirmPasswordVisibility}
-                  aria-label="toggle confirm password visibility"
-                >
-                  {isConfirmPasswordVisible ? (
-                    <EyeOff className="text-2xl text-default-400 pointer-events-none" />
-                  ) : (
-                    <Eye className="text-2xl text-default-400 pointer-events-none" />
-                  )}
-                </button>
-              }
-              type={isConfirmPasswordVisible ? "text" : "password"}
-              isRequired
-            />
-          )}
-          {!isSignup && (
-            <div className="text-right">
-              <Link href="#" className="text-sm text-primary hover:underline">
-                Forgot your password?
-              </Link>
+                Log In
+              </Button>
+            </form>
+            <div className="my-4 sm:my-6">
+              <div className="flex items-center">
+                <div className="flex-grow h-[1px] bg-[#FFFFFF33]"></div>
+                <span className="px-4 text-sm md:text-[14px] text-[#FFFFFF80]">
+                  or
+                </span>
+                <div className="flex-grow h-[1px] bg-[#FFFFFF33]"></div>
+              </div>
             </div>
-          )}
-
-          {error && <p className="text-danger text-sm">{error}</p>}
-
-          <Button
-            type="submit"
-            color="primary"
-            className="mt-2"
-            isLoading={isLoading}
-          >
-            {isSignup ? "Sign Up" : "Login"}
-          </Button>
-        </form>
-        <Button
-          variant="bordered"
-          className="w-full mt-4"
-          startContent={<GoogleIcon />}
-          onPress={handleGoogleLogin}
-        >
-          Login with Google
-        </Button>
-        <div className="mt-4 text-center">
-          <Button
-            variant="light"
-            onPress={() => setIsSignup(!isSignup)}
-            className="text-sm"
-          >
-            {isSignup
-              ? "Already have an account? Login"
-              : "Don't have an account? Sign Up"}
-          </Button>
-        </div>
-      </CardBody>
-    </Card>
+            <Button
+              radius="none"
+              className="w-full bg-white text-black h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              startContent={<GoogleIcon />}
+              onPress={handleGoogleLogin}
+            >
+              Login with Google
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+    </div>
   );
 }

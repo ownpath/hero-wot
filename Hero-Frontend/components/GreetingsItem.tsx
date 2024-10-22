@@ -1,7 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardHeader, CardBody, CardFooter, Image } from "@nextui-org/react";
-import { Calendar, User } from 'lucide-react';
+import React from "react";
+import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/react";
+import { Calendar, User } from "lucide-react";
 
 export interface Greeting {
   id: number;
@@ -9,58 +8,41 @@ export interface Greeting {
   body: string;
   created_at: string;
   author: { name: string };
-  media: { url: string; type: string }[];
 }
 
 interface GreetingItemProps {
   card: Greeting;
-  onPress: (card: Greeting) => void;
 }
 
-const GreetingItem: React.FC<GreetingItemProps> = ({ card, onPress }) => {
+const GreetingItem: React.FC<GreetingItemProps> = ({ card }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     }).format(date);
   };
 
   return (
-    <motion.div layoutId={`card-${card.id}`}>
-      <Card 
-        isPressable
-        onPress={() => onPress(card)}
-        className="mb-4 w-full"
-      >
-        <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
-          <h4 className="font-bold text-large">{card.title}</h4>
-        </CardHeader>
-        <CardBody className="py-2 px-4">
-          <p className="whitespace-pre-line">{card.body}</p>
-          {card.media.length > 0 && (
-            <Image
-              alt="Greeting image"
-              className="object-cover rounded-xl mt-4"
-              src={card.media[0].url}
-              width="100%"
-              height={140}
-            />
-          )}
-        </CardBody>
-        <CardFooter className="text-small text-default-500 flex justify-between px-4 py-4">
-          <div className="flex items-center">
-            <User size={16} className="mr-1" />
-            <span>{card.author.name}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar size={16} className="mr-1" />
-            <span>{formatDate(card.created_at)}</span>
-          </div>
-        </CardFooter>
-      </Card>
-    </motion.div>
+    <Card className="bg-zinc-800 w-full">
+      <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+        <h4 className="font-bold text-lg text-white">{card.title}</h4>
+      </CardHeader>
+      <CardBody className="py-2">
+        <p className="text-sm text-gray-300">{card.body}</p>
+      </CardBody>
+      <CardFooter className="text-xs justify-between bg-zinc-800 border-t border-zinc-700">
+        <div className="flex items-center">
+          <User size={16} className="text-gray-400 mr-1" />
+          <span className="text-gray-400">{card.author.name}</span>
+        </div>
+        <div className="flex items-center">
+          <Calendar size={16} className="text-gray-400 mr-1" />
+          <span className="text-gray-400">{formatDate(card.created_at)}</span>
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
 

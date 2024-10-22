@@ -75,22 +75,23 @@ const updatePostStatus = async ({
   }
 };
 
+const usePostQuery = (status: Post["status"]) => {
+  return useInfiniteQuery({
+    queryKey: ["posts", status],
+    queryFn: ({ pageParam = 0 }) => fetchPosts({ pageParam, status }),
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    initialPageParam: 0,
+  });
+};
+
 const PostManagementTabs: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const queryClient = useQueryClient();
 
-  const createPostQuery = (status: Post["status"]) =>
-    useInfiniteQuery({
-      queryKey: ["posts", status],
-      queryFn: ({ pageParam = 0 }) => fetchPosts({ pageParam, status }),
-      getNextPageParam: (lastPage) => lastPage.nextOffset,
-      initialPageParam: 0,
-    });
-
-  const processingQuery = createPostQuery("processing");
-  const acceptedQuery = createPostQuery("accepted");
-  const rejectedQuery = createPostQuery("rejected");
+  const processingQuery = usePostQuery("processing");
+  const acceptedQuery = usePostQuery("accepted");
+  const rejectedQuery = usePostQuery("rejected");
 
   const updateStatusMutation = useMutation({
     mutationFn: updatePostStatus,
@@ -133,11 +134,7 @@ const PostManagementTabs: React.FC = () => {
 
       if (post) intObserver.current.observe(post);
     },
-    [
-      processingQuery.isFetchingNextPage,
-      acceptedQuery.isFetchingNextPage,
-      rejectedQuery.isFetchingNextPage,
-    ]
+    [processingQuery, acceptedQuery, rejectedQuery]
   );
 
   const renderPostCards = (status: Post["status"]) => {
@@ -174,10 +171,7 @@ const PostManagementTabs: React.FC = () => {
                   Updated: {new Date(post.updated_at).toLocaleString()}
                 </p>
               </div>
-              <div
-                className="flex space-x-2"
-                onClick={(e) => e.preventDefault()}
-              >
+              <div className="flex space-x-2">
                 {status === "processing" && (
                   <>
                     <Button

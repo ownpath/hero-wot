@@ -16,9 +16,13 @@ import {
   FileAudio,
   FileVideo,
   X,
+  Send,
 } from "lucide-react";
+import authenticatedRequest from "../config/authenticatedRequest";
 
 type FileType = "image" | "video" | "audio";
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
 
 interface FileInfo {
   file: File;
@@ -28,22 +32,22 @@ interface FileInfo {
   uploadProgress: number;
   uploadStatus: "pending" | "uploading" | "completed" | "error";
   uploadedUrl?: string;
+  previewUrl: string;
 }
 
 export default function BirthdayGreetingsForm() {
-  const [title, setTitle] = useState("");
   const [greetings, setGreetings] = useState("");
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [fileError, setFileError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    files.forEach((file) => {
-      console.log(
-        `File ${file.name} progress: ${file.uploadProgress.toFixed(2)}%`
-      );
-    });
-  }, [files]);
+    // Cleanup function to revoke object URLs
+    return () => {
+      Object.values(previewUrls).forEach(URL.revokeObjectURL);
+    };
+  }, [previewUrls]);
 
   const allowedTypes: Record<FileType, string[]> = {
     image: [
@@ -88,55 +92,88 @@ export default function BirthdayGreetingsForm() {
     return undefined;
   };
 
-  const uploadFile = async (fileInfo: FileInfo) => {
-    try {
-      const response = await fetch("/api/get-upload-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: fileInfo.name,
-          fileType: fileInfo.file.type,
-        }),
-      });
+  const onDrop = useCallback(async (acceptedFiles: FileWithPath[]) => {
+    console.log("Files dropped:", acceptedFiles);
 
-      if (!response.ok) {
-        throw new Error("Failed to get upload URL");
+    // Filter files by size and type
+    const validFiles = acceptedFiles.filter((file) => {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        setFileError(`File ${file.name} is too large. Maximum size is 100MB.`);
+        return false;
       }
 
-      const { url } = await response.json();
+      // Check file type
+      const detectedType = detectFileType(file);
+      if (!detectedType) {
+        setFileError(`File ${file.name} is not a supported format.`);
+        return false;
+      }
 
-      const uploadResponse = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", url);
-        xhr.setRequestHeader("Content-Type", fileInfo.file.type);
+      return true;
+    });
 
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = (event.loaded / event.total) * 100;
-            console.log(
-              `Upload progress for ${fileInfo.name}: ${percentComplete.toFixed(2)}%`
+    const newFiles = validFiles.map((file) => {
+      const detectedType = detectFileType(file);
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewUrls((prev) => ({ ...prev, [file.name]: previewUrl }));
+      return {
+        file,
+        name: file.name,
+        path: file.path || file.name,
+        fileType: detectedType!,
+        uploadProgress: 0,
+        uploadStatus: "pending",
+        previewUrl,
+      } as FileInfo;
+    });
+
+    if (newFiles.length > 0) {
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      setFileError("");
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".tiff", ".bmp"],
+      "video/*": [".mp4", ".mov", ".avi", ".wmv", ".webm", ".3gp", ".mkv"],
+      "audio/*": [".mp3", ".wav", ".aac", ".ogg", ".flac"],
+    },
+    multiple: true,
+  });
+
+  const uploadFile = async (fileInfo: FileInfo) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", fileInfo.file);
+
+      const response = await authenticatedRequest({
+        method: "POST",
+        url: "/upload",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
             );
             setFiles((prevFiles) =>
               prevFiles.map((f) =>
                 f.name === fileInfo.name
-                  ? { ...f, uploadProgress: percentComplete }
+                  ? {
+                      ...f,
+                      uploadProgress: percentCompleted,
+                      uploadStatus: "uploading",
+                    }
                   : f
               )
             );
           }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status === 200) {
-            resolve(xhr);
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("XHR error"));
-
-        xhr.send(fileInfo.file);
+        },
       });
 
       setFiles((prevFiles) =>
@@ -146,14 +183,14 @@ export default function BirthdayGreetingsForm() {
                 ...f,
                 uploadStatus: "completed",
                 uploadProgress: 100,
-                uploadedUrl: url.split("?")[0],
+                uploadedUrl: response.data.url,
               }
             : f
         )
       );
 
       console.log("File uploaded successfully:", fileInfo.name);
-      return url.split("?")[0];
+      return response.data.url;
     } catch (error) {
       console.error(`Error uploading file ${fileInfo.name}:`, error);
       setFiles((prevFiles) =>
@@ -166,43 +203,6 @@ export default function BirthdayGreetingsForm() {
       throw error;
     }
   };
-
-  const onDrop = useCallback(async (acceptedFiles: FileWithPath[]) => {
-    console.log("Files dropped:", acceptedFiles);
-    const newFiles = acceptedFiles
-      .map((file) => {
-        const detectedType = detectFileType(file);
-        if (detectedType) {
-          return {
-            file,
-            name: file.name,
-            path: file.path || file.name,
-            fileType: detectedType,
-            uploadProgress: 0,
-            uploadStatus: "pending",
-          } as FileInfo;
-        }
-        return null;
-      })
-      .filter((file): file is FileInfo => file !== null);
-
-    if (newFiles.length > 0) {
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-      setFileError("");
-    } else {
-      setFileError("Please upload valid image, video, or audio files.");
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".tiff", ".bmp"],
-      "video/*": [".mp4", ".mov", ".avi", ".wmv", ".webm", ".3gp"],
-      "audio/*": [".mp3", ".wav", ".aac", ".ogg", ".flac"],
-    },
-    multiple: true,
-  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -219,9 +219,7 @@ export default function BirthdayGreetingsForm() {
       }));
 
       const postData = {
-        title,
         body: greetings,
-        userId: 15,
         status: "processing",
         score: null,
         media: media,
@@ -229,25 +227,14 @@ export default function BirthdayGreetingsForm() {
 
       console.log("Sending post data:", postData);
 
-      const response = await fetch("http://localhost:8080/posts", {
+      const response = await authenticatedRequest({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(postData),
+        url: "/posts",
+        data: postData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `HTTP error! status: ${response.status}, message: ${errorData.error}`
-        );
-      }
+      console.log("Server response:", response.data);
 
-      const result = await response.json();
-      console.log("Server response:", result);
-
-      setTitle("");
       setGreetings("");
       setFiles([]);
       console.log("Form reset");
@@ -260,7 +247,48 @@ export default function BirthdayGreetingsForm() {
   };
 
   const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFiles((prevFiles) => {
+      const fileToRemove = prevFiles[index];
+      URL.revokeObjectURL(fileToRemove.previewUrl);
+      setPreviewUrls((prev) => {
+        const { [fileToRemove.name]: _, ...rest } = prev;
+        return rest;
+      });
+      return prevFiles.filter((_, i) => i !== index);
+    });
+  };
+
+  const renderPreview = (fileInfo: FileInfo) => {
+    switch (fileInfo.fileType) {
+      case "image":
+        return (
+          <img
+            src={fileInfo.previewUrl}
+            alt={fileInfo.name}
+            className="max-w-full h-auto max-h-40 object-contain"
+          />
+        );
+      case "video":
+        return (
+          <video
+            src={fileInfo.previewUrl}
+            controls
+            className="max-w-full h-auto max-h-40"
+          >
+            <track kind="captions" />
+            Your browser does not support the video tag.
+          </video>
+        );
+      case "audio":
+        return (
+          <audio src={fileInfo.previewUrl} controls className="w-full">
+            <track kind="captions" />
+            Your browser does not support the audio element.
+          </audio>
+        );
+      default:
+        return null;
+    }
   };
 
   const FileTypeIcon = ({ fileType }: { fileType: FileType }) => {
@@ -274,116 +302,118 @@ export default function BirthdayGreetingsForm() {
     }
   };
 
-  const isFormValid = title.trim() !== "" && greetings.trim() !== "";
+  const isFormValid = greetings.trim() !== "";
 
   return (
-    <Card className="max-w-[400px]">
-      <CardHeader className="flex flex-col items-start px-6 pt-6 pb-0">
-        <h4 className="text-xl font-bold">Post Birthday Greetings</h4>
-        <p className="text-small text-default-500">
-          Create a special birthday message with media
-        </p>
-      </CardHeader>
-      <CardBody className="px-6 py-4 overflow-visible">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Input
-            label="Title"
-            value={title}
-            onValueChange={setTitle}
-            placeholder="Enter a title for your greeting"
-            variant="bordered"
-            isRequired
-            labelPlacement="outside"
-          />
-
-          <Textarea
-            label="Greetings"
-            value={greetings}
-            onValueChange={setGreetings}
-            placeholder="Write your birthday message here"
-            variant="bordered"
-            minRows={3}
-            isRequired
-            labelPlacement="outside"
-          />
-
-          <div className="space-y-2">
-            <p className="text-small font-medium">
-              Upload Media (Images, Videos, or Audio)
+    <div className="min-h-screen w-full flex items-center justify-center p-4">
+      <Card
+        className="w-full max-w-[842px] min-h-[556px] bg-[#000000] rounded-[4px] border border-[#FFFFFF33] mx-auto"
+        radius="none"
+      >
+        <div className="p-[32px]">
+          <CardHeader className="flex flex-col items-start justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
+            <h1 className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+              Create your wishes for the Chairman
+            </h1>
+            <p className="w-full sm:max-w-[571px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-start">
+              Share your thoughts, wishes, or stories. You can write a message,{" "}
+              <br />
+              upload a photo, or even add a video to make it more personal.
             </p>
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer ${
-                isDragActive
-                  ? "border-primary bg-primary-50"
-                  : "border-default-300"
-              }`}
-            >
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p>Drop the files here ...</p>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <Upload className="w-10 h-10 mb-2 text-default-400" />
-                  <p>
-                    Drag &apos;n&apos; drop files here, or click to select files
-                  </p>
-                </div>
-              )}
-            </div>
-            {fileError && (
-              <div className="text-danger flex items-center text-sm mt-2">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {fileError}
-              </div>
-            )}
-            {files.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {files.map((fileInfo, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-content2 p-2 rounded"
-                  >
-                    <div className="flex items-center overflow-hidden flex-grow mr-2">
-                      <FileTypeIcon fileType={fileInfo.fileType} />
-                      <p className="text-sm ml-2 truncate">{fileInfo.name}</p>
+          </CardHeader>
+
+          <CardBody className="p-0 mt-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="w-[778px] h-[372px] bg-[#323337] rounded-[4px] p-6">
+                <div className="h-full flex flex-col justify-between">
+                  <Textarea
+                    placeholder="Write your message here.."
+                    value={greetings}
+                    onValueChange={setGreetings}
+                    variant="bordered"
+                    minRows={8}
+                    classNames={{
+                      base: "max-w-full flex-grow",
+                      input: "bg-transparent text-white resize-none h-full",
+                      innerWrapper: "bg-transparent h-full",
+                      inputWrapper: "border-none h-full",
+                    }}
+                  />
+                  <div className="w-full h-[1px] bg-[#FFFFFF33] mb-4" />
+
+                  <div className="flex justify-between items-center pt-4">
+                    <div>
+                      <div
+                        {...getRootProps()}
+                        className="flex gap-2 items-center justify-center bg-[#666972] hover:bg-[#404040] transition-colors text-white rounded px-4 py-2 cursor-pointer"
+                      >
+                        <input {...getInputProps()} />
+                        Attach Image or Video
+                      </div>
+                      {fileError && (
+                        <div className="text-danger flex items-center text-sm mt-2">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {fileError}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center">
+                    <Button
+                      type="submit"
+                      startContent={<Send />}
+                      className="bg-[#D92D20] hover:bg-[#F04438] transition-colors text-white rounded px-6 py-2"
+                      isDisabled={!isFormValid || isUploading}
+                      isLoading={isUploading}
+                    >
+                      Send Wishes!
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {files.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  {files.map((fileInfo, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#1A1A1A] p-4 rounded border border-[#FFFFFF33]"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center overflow-hidden flex-grow mr-2">
+                          <FileTypeIcon fileType={fileInfo.fileType} />
+                          <p className="text-sm ml-2 truncate text-[#FFFFFFB2]">
+                            {fileInfo.name}
+                          </p>
+                        </div>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          onPress={() => removeFile(index)}
+                          className="text-[#FFFFFFB2] hover:text-white bg-transparent"
+                          isDisabled={fileInfo.uploadStatus === "uploading"}
+                        >
+                          <X size={16} />
+                        </Button>
+                      </div>
+                      <div className="mb-2">{renderPreview(fileInfo)}</div>
                       <Progress
-                        size="md"
+                        size="sm"
                         value={fileInfo.uploadProgress}
-                        color="primary"
-                        className="max-w-md w-20 mr-2"
+                        className="max-w-md"
+                        classNames={{
+                          base: "max-w-md",
+                          track: "bg-[#333333]",
+                          indicator: "bg-[#D92D20]",
+                        }}
                         aria-label={`Upload progress for ${fileInfo.name}`}
                       />
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        onPress={() => removeFile(index)}
-                        color="danger"
-                        variant="light"
-                        isDisabled={fileInfo.uploadStatus === "uploading"}
-                      >
-                        <X size={16} />
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            color="primary"
-            isLoading={isUploading}
-            className="w-full"
-            isDisabled={!isFormValid || isUploading}
-          >
-            {isUploading ? "Uploading..." : "Post Greeting"}
-          </Button>
-        </form>
-      </CardBody>
-    </Card>
+                  ))}
+                </div>
+              )}
+            </form>
+          </CardBody>
+        </div>
+      </Card>
+    </div>
   );
 }

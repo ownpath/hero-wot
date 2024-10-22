@@ -11,16 +11,29 @@ import {
 import { Button } from "@nextui-org/button";
 import { Link } from "@nextui-org/link";
 import { link as linkStyles } from "@nextui-org/theme";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
 import NextLink from "next/link";
+import { useTheme } from "next-themes";
 import clsx from "clsx";
 
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { Logo } from "@/components/icons";
-import { Hourglass, PenSquare, LogIn } from "lucide-react";
+import { Hourglass, PenSquare, LogIn, Palette } from "lucide-react";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  const themes = [
+    { key: "guardian", name: "Guardian" },
+    { key: "going-global", name: "Going Global" },
+    { key: "motorsports", name: "Motorsports" },
+    { key: "bravery", name: "Bravery" },
+    { key: "vida", name: "Vida" },
+  ];
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -55,11 +68,38 @@ export const Navbar = () => {
     }
   };
 
+  const renderThemeSwitch = () => (
+    <Dropdown>
+      <DropdownTrigger>
+        <Button
+          variant="light"
+          startContent={<Palette size={18} />}
+          className="text-sm font-normal"
+        >
+          Theme
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu
+        aria-label="Theme selection"
+        selectedKeys={new Set([theme || ""])}
+        onSelectionChange={(keys) => {
+          const selected = Array.from(keys)[0]?.toString();
+          if (selected) setTheme(selected);
+        }}
+        selectionMode="single"
+      >
+        {themes.map((t) => (
+          <DropdownItem key={t.key}>{t.name}</DropdownItem>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
+  );
+
   return (
     <NextUINavbar
       maxWidth="full"
       position="static"
-      className=" bg-content1 rounded-full shadow-md"
+      className="bg-content1 rounded-full shadow-md"
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -106,6 +146,7 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
+        <NavbarItem>{renderThemeSwitch()}</NavbarItem>
         <NavbarItem>{renderAuthButton()}</NavbarItem>
       </NavbarContent>
 
@@ -134,6 +175,7 @@ export const Navbar = () => {
               {isLoggedIn ? "Compose Message" : "Login"}
             </Link>
           </NavbarMenuItem>
+          <NavbarMenuItem>{renderThemeSwitch()}</NavbarMenuItem>
         </div>
       </NavbarMenu>
     </NextUINavbar>
