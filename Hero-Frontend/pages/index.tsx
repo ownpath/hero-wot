@@ -1,15 +1,32 @@
 import React from "react";
 import Image from "next/image";
+import HourglassAnimation from "./animehome";
+import { useRouter } from "next/router";
 
-const HourglassWithContent = () => {
+const CombinedHourglass = () => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    console.log("acccessToken", accessToken);
+    if (accessToken) {
+      router.push("/postgreeting");
+    } else {
+      router.push("/login");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full overflow-hidden bg-indigo-700">
       <div className="flex justify-center">
         <div className="relative w-full max-w-[761px] mx-auto">
-          {/* Base Layer - Hourglass SVG */}
+          {/* Base Layer - Static Hourglass */}
           <div className="relative z-0">
             <Image
-              src="/Full-illustration.svg"
+              src="/shapes/Container.svg"
               alt="Coming Soon Illustration"
               width={761}
               height={1918}
@@ -17,13 +34,20 @@ const HourglassWithContent = () => {
               className="w-full h-auto"
             />
           </div>
+          {/* Physics Animation Layer */}
+          <div className="absolute inset-0 z-10">
+            <HourglassAnimation
+              hourGlassColor="#ff2000"
+              comingSoonColor="#FDC500"
+              numbersColor="#FFFFFF"
+            />
+          </div>
 
-          {/* Content Container */}
-          <div className="absolute inset-0 flex flex-col items-center">
+          <div className="absolute inset-0 flex flex-col items-center z-20">
             {/* Logo at the top */}
             <div className="mt-14">
               <Image
-                src="/logo.svg"
+                src="/Main-logo.svg"
                 alt="Logo"
                 width={56}
                 height={59}
@@ -33,10 +57,10 @@ const HourglassWithContent = () => {
             </div>
 
             {/* Main Content */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-[20%] w-full flex flex-col items-center">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-[20%] w-full flex flex-col items-center justify-center">
               {/* Number Container */}
               <div className="text-center">
-                <div className="text-[240px] leading-none font-serif text-white sm:text-[640px] md:text-[640px]">
+                <div className="text-[240px] leading-none font-serif text-white sm:text-[520px] md:text-[520px]">
                   8
                 </div>
                 <div className="text-white tracking-[4px] text-xs">
@@ -54,7 +78,10 @@ const HourglassWithContent = () => {
               </p>
 
               {/* Button */}
-              <button className="bg-[#F8BE45] hover:bg-[#F8BE45]/90 text-black px-8 py-3.5 rounded-full flex items-center gap-2 text-sm w-[218px] h-[56px] justify-center">
+              <button
+                className="bg-[#F8BE45] hover:bg-[#F8BE45]/90 text-black px-8 py-3.5 rounded-full flex items-center gap-2 text-sm w-[218px] h-[56px] justify-center"
+                onClick={handleSubmit}
+              >
                 <svg
                   width="20"
                   height="20"
@@ -73,17 +100,6 @@ const HourglassWithContent = () => {
                 Send Your Best Wishes
               </button>
             </div>
-
-            {/* Record Icon */}
-            {/* <div className="absolute bottom-[20%] right-20">
-              <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-black border-2 border-white relative">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-[#EE2326] text-2xl">♥</div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
@@ -91,4 +107,4 @@ const HourglassWithContent = () => {
   );
 };
 
-export default HourglassWithContent;
+export default CombinedHourglass;

@@ -103,15 +103,15 @@ const VerifyEmail = () => {
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <Toaster position="top-center" expand={true} richColors />
-      <Card className="w-full max-w-[573px] min-h-[280px] p-[44px] items-center justify-center bg-black text-white rounded-[4px] border border-[#FFFFFF33] mx-auto ">
+      <Card className="w-full max-w-[573px] min-h-[280px] p-[44px] items-center justify-center bg-hourglass rounded-[4px] mx-auto ">
         <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
           <h1
-            className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3"
+            className="font-ztNeueRalewe italic text-headingText text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3"
             style={{ fontFamily: "serif" }}
           >
             We&apos;ve Sent You An Email!
           </h1>
-          <p className="w-full sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
+          <p className="w-full sm:max-w-[453px] text-headingText text-sm md:text-[14px] leading-normal sm:leading-[21px] text-center">
             We&apos;ve just sent you a code to your email address.
             <br />
             You can paste the code you&apos;ve received below.
@@ -137,7 +137,7 @@ const VerifyEmail = () => {
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className="w-[38px] h-14 text-center text-2xl bg-[#323337] border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
+                    className="w-[38px] h-14 text-center text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
                   />
                   {index === 2 && (
                     <span className="text-2xl self-center">-</span>
@@ -147,7 +147,7 @@ const VerifyEmail = () => {
             </div>
             <Button
               type="submit"
-              className="mt-2 bg-[#EE2326] h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              className="mt-2 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
               radius="none"
               isLoading={isLoading}
             >

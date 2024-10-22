@@ -317,24 +317,24 @@ export default function BirthdayGreetingsForm() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
       <Card
-        className="w-full max-w-[842px] min-h-[556px] bg-background-primary rounded-[4px] border border-[#FFFFFF33] mx-auto"
+        className="w-full max-w-[842px] min-h-[556px] bg-hourglass rounded-[4px] mx-auto"
         radius="none"
       >
-        <div className="p-[32px]">
+        <div className="p-4 sm:p-6 md:p-[32px]">
           <CardHeader className="flex flex-col items-start justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-            <h1 className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+            <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
               Create your wishes for the Chairman
             </h1>
-            <p className="w-full sm:max-w-[571px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-start">
+            <p className="w-full text-headingText sm:max-w-[571px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-start">
               Share your thoughts, wishes, or stories. You can write a message,{" "}
-              <br />
+              <br className="hidden sm:block" />
               upload a photo, or even add a video to make it more personal.
             </p>
           </CardHeader>
 
-          <CardBody className="p-0 mt-8">
+          <CardBody className="p-0 mt-4 sm:mt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="w-[778px] h-[372px] bg-[#323337] rounded-[4px] p-6">
+              <div className="w-full bg-[#323337] rounded-[4px] p-3 sm:p-4 md:p-6">
                 <div className="h-full flex flex-col justify-between">
                   <Textarea
                     placeholder="Write your message here.."
@@ -349,16 +349,18 @@ export default function BirthdayGreetingsForm() {
                       inputWrapper: "border-none h-full",
                     }}
                   />
-                  <div className="w-full h-[1px] bg-[#FFFFFF33] mb-4" />
+                  <div className="w-full h-[1px] bg-[#FFFFFF33] my-4" />
 
-                  <div className="flex justify-between items-center pt-4">
-                    <div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 pt-4">
+                    <div className="w-full sm:w-auto">
                       <div
                         {...getRootProps()}
-                        className="flex gap-2 items-center justify-center bg-[#666972] hover:bg-[#404040] transition-colors text-white rounded px-4 py-2 cursor-pointer"
+                        className="w-full sm:w-auto flex gap-2 items-center justify-center bg-[#666972] hover:bg-[#404040] transition-colors text-white rounded px-4 py-2 cursor-pointer"
                       >
                         <input {...getInputProps()} />
-                        Attach Image or Video
+                        <span className="text-sm sm:text-base">
+                          Attach Image or Video
+                        </span>
                       </div>
                       {fileError && (
                         <div className="text-danger flex items-center text-sm mt-2">
@@ -370,7 +372,7 @@ export default function BirthdayGreetingsForm() {
                     <Button
                       type="submit"
                       startContent={<Send />}
-                      className="bg-[#D92D20] hover:bg-[#F04438] transition-colors text-white rounded px-6 py-2"
+                      className="w-full sm:w-auto bg-[#D92D20] hover:bg-[#F04438] transition-colors text-white rounded px-6 py-2"
                       isDisabled={!isFormValid || isUploading}
                       isLoading={isUploading}
                     >
@@ -404,7 +406,9 @@ export default function BirthdayGreetingsForm() {
                           <X size={16} />
                         </Button>
                       </div>
-                      <div className="mb-2">{renderPreview(fileInfo)}</div>
+                      <div className="mb-2 overflow-hidden">
+                        {renderPreview(fileInfo)}
+                      </div>
                       <Progress
                         size="sm"
                         value={fileInfo.uploadProgress}

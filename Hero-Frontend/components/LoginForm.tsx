@@ -100,14 +100,14 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
       <Card
-        className="w-full max-w-[573px] min-h-[740px] p-4 sm:p-8 md:p-11 bg-[#000000] rounded-[4px] border border-[#FFFFFF33] mx-auto items-center justify-center"
+        className="w-full max-w-[573px] min-h-[740px] p-4 sm:p-8 md:p-11 bg-hourglass rounded-[4px] border border-[#FFFFFF33] mx-auto items-center justify-center"
         radius="none"
       >
         <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-          <h1 className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+          <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
             Welcome
           </h1>
-          <p className="w-full sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
+          <p className="w-full text-headingText sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
             Share your thoughts, wishes, or stories. You can write a message,
             upload a photo, or even add a video to make it more personal.
           </p>
@@ -131,9 +131,9 @@ export default function LoginForm() {
                   base: "max-w-full",
                   label:
                     "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
-                  input: "h-10 sm:h-[46px] bg-[#1C1C1C] text-white",
+                  input: "h-10 sm:h-[46px] text-headingText text-white",
                   inputWrapper:
-                    "h-10 sm:h-[46px] bg-[#1C1C1C] hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                    "h-10 sm:h-[46px] bg-labelField hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
                 }}
                 isRequired
               />
@@ -141,7 +141,7 @@ export default function LoginForm() {
               {error && <p className="text-danger text-sm">{error}</p>}
               <Button
                 type="submit"
-                className="mt-2 bg-[#EE2326] h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+                className="mt-2 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
                 radius="none"
                 isLoading={isLoading}
               >
@@ -159,7 +159,7 @@ export default function LoginForm() {
             </div>
             <Button
               radius="none"
-              className="w-full bg-white text-black h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              className="w-full bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
               startContent={<GoogleIcon />}
               onPress={handleGoogleLogin}
             >

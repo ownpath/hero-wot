@@ -102,7 +102,7 @@ function loadAndColorSVG(imgPath: string, color: string): Promise<string> {
 
 const HourglassAnimation: React.FC<Props> = ({
   hourGlassColor = "#ff2000",
-  comingSoonColor = "#FFFFFF",
+  comingSoonColor = "#FF0000",
   numbersColor = "#FFFFFF",
 }) => {
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -155,6 +155,8 @@ const HourglassAnimation: React.FC<Props> = ({
       const width = window.innerWidth;
       const height = window.innerHeight;
 
+      console.log("width of bound", width);
+
       // Create renderer
       const render = Render.create({
         element: sceneRef.current,
@@ -174,11 +176,11 @@ const HourglassAnimation: React.FC<Props> = ({
       const hourglass = createSVGBodyFromPath(
         hourglassPath,
         width / 2,
-        height / 1.5,
+        height / 1.15,
         {
           isStatic: true,
           render: {
-            fillStyle: "rgba(0, 255, 0, 0.0)",
+            fillStyle: "rgba(0, 255, 0, 0)",
           },
         }
       );
@@ -237,7 +239,7 @@ const HourglassAnimation: React.FC<Props> = ({
 
               // Create a rectangle body and use the SVG as its texture
               const numberBody = Bodies.rectangle(
-                width / 2 + (index - 4) * 10, // Spread numbers horizontally
+                width / 2 + (index - 4) * 100, // Spread numbers horizontally
                 yPosition,
                 100, // width of the body
                 150, // height of the body
@@ -313,10 +315,10 @@ const HourglassAnimation: React.FC<Props> = ({
   }, []);
 
   return (
-    <div className="relative w-full h-screen bg-black">
+    <div className="relative w-full h-screen">
       <div
         ref={sceneRef}
-        className="absolute inset-0 z-10 overflow-hidden bg-transparent"
+        className="flex items-center justify-center inset-0 z-10 bg-transparent"
       />
 
       {/* Static hourglass SVG for visual reference */}
@@ -324,13 +326,13 @@ const HourglassAnimation: React.FC<Props> = ({
       {/* Noise overlay */}
       <div
         className="fixed inset-0 z-50 pointer-events-none opacity-50 mix-blend-multiply"
-        style={{
-          backgroundImage:
-            "url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp)",
-          backgroundRepeat: "repeat",
-          backgroundSize: "auto",
-          animation: "noise 100ms infinite",
-        }}
+        // style={{
+        //   backgroundImage:
+        //     "url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp)",
+        //   backgroundRepeat: "repeat",
+        //   backgroundSize: "auto",
+        //   animation: "noise 100ms infinite",
+        // }}
       />
     </div>
   );

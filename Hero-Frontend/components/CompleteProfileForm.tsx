@@ -89,12 +89,12 @@ export default function CompleteProfileForm({
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
-      <Card className="w-[573px] min-h-[740px] p-11 bg-[#000000] rounded-[4px] border border-[#FFFFFF33] mx-auto">
+      <Card className="w-[573px] min-h-[740px] p-11 bg-hourglass rounded-[4px] mx-auto">
         <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-          <h1 className="font-ztNeueRalewe italic text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+          <h1 className="font-ztNeueRalewe italic text-headingText text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
             Tell Us More About Yourself
           </h1>
-          <p className="w-full sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
+          <p className="w-full sm:max-w-[453px] text-headingText text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
             Share your thoughts, wishes, or stories. You can write a message,
             upload a photo, or even add a video to make it more personal.
           </p>
