@@ -10,7 +10,7 @@ export const description =
   "A sign-up form with first name, last name, email, password, and confirm password fields. There's an option to switch to login mode and login with Google.";
 
 // API configuration
-const API_URL = "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,

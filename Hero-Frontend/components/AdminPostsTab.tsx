@@ -12,6 +12,12 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@nextui-org/react";
 import axios from "axios";
 import {
@@ -19,8 +25,10 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
+import authenticatedRequest from "@/config/authenticatedRequest";
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Post {
   id: number;
@@ -38,8 +46,22 @@ interface Post {
   updated_at: string;
 }
 
-interface ApiResponse {
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+}
+
+interface PostsApiResponse {
   posts: Post[];
+  totalCount: number;
+  nextOffset: number | null;
+}
+
+interface UsersApiResponse {
+  users: User[];
   totalCount: number;
   nextOffset: number | null;
 }
@@ -50,10 +72,24 @@ const fetchPosts = async ({
 }: {
   pageParam?: number;
   status: Post["status"];
-}): Promise<ApiResponse> => {
-  const response = await axios.get<ApiResponse>(`${API_BASE_URL}/posts`, {
+}): Promise<PostsApiResponse> => {
+  const response = await authenticatedRequest({
+    method: "GET",
+    url: "/posts",
     params: {
       status,
+      limit: 10,
+      offset: pageParam,
+    },
+  });
+  return response.data;
+};
+
+const fetchUsers = async ({ pageParam = 0 }): Promise<UsersApiResponse> => {
+  const response = await authenticatedRequest({
+    method: "GET",
+    url: "/users",
+    params: {
       limit: 10,
       offset: pageParam,
     },
@@ -69,9 +105,16 @@ const updatePostStatus = async ({
   newStatus: Post["status"];
 }) => {
   if (newStatus === "accepted") {
-    await axios.put(`${API_BASE_URL}/posts/approve/${postId}`);
+    await authenticatedRequest({
+      method: "PUT",
+      url: `/posts/approve/${postId}`,
+    });
   } else {
-    await axios.put(`${API_BASE_URL}/posts/${postId}`, { status: newStatus });
+    await authenticatedRequest({
+      method: "PUT",
+      url: `/posts/${postId}`,
+      data: { status: newStatus },
+    });
   }
 };
 
@@ -84,15 +127,26 @@ const usePostQuery = (status: Post["status"]) => {
   });
 };
 
-const PostManagementTabs: React.FC = () => {
+const AdminManagementTabs: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const queryClient = useQueryClient();
+  const intObserver = useRef<IntersectionObserver | null>(null);
 
+  // Post queries
   const processingQuery = usePostQuery("processing");
   const acceptedQuery = usePostQuery("accepted");
   const rejectedQuery = usePostQuery("rejected");
 
+  // Users query
+  const usersQuery = useInfiniteQuery({
+    queryKey: ["users"],
+    queryFn: ({ pageParam = 0 }) => fetchUsers({ pageParam }),
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    initialPageParam: 0,
+  });
+
+  // Mutations
   const updateStatusMutation = useMutation({
     mutationFn: updatePostStatus,
     onSuccess: () => {
@@ -100,6 +154,25 @@ const PostManagementTabs: React.FC = () => {
     },
   });
 
+  const promoteToAdminMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await authenticatedRequest({
+        method: "PUT",
+        url: "/admin/promote-to-admin",
+        data: { id },
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success(data.message);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to promote user to admin");
+    },
+  });
+
+  // Handlers
   const handleStatusChange = (postId: number, newStatus: Post["status"]) => {
     updateStatusMutation.mutate({ postId, newStatus });
     setSelectedPost((prev) =>
@@ -112,7 +185,6 @@ const PostManagementTabs: React.FC = () => {
     onOpen();
   };
 
-  const intObserver = useRef<IntersectionObserver | null>(null);
   const lastPostRef = useCallback(
     (post: HTMLDivElement | null, status: Post["status"]) => {
       const query =
@@ -137,6 +209,7 @@ const PostManagementTabs: React.FC = () => {
     [processingQuery, acceptedQuery, rejectedQuery]
   );
 
+  // Render functions
   const renderPostCards = (status: Post["status"]) => {
     const query =
       status === "processing"
@@ -211,33 +284,100 @@ const PostManagementTabs: React.FC = () => {
     );
   };
 
+  const renderUsersTable = () => {
+    const users = usersQuery.data?.pages.flatMap((page) => page.users) || [];
+
+    console.log("users from admin", users);
+
+    return (
+      <Table aria-label="Users table">
+        <TableHeader>
+          <TableColumn>NAME</TableColumn>
+          <TableColumn>EMAIL</TableColumn>
+          <TableColumn>ROLE</TableColumn>
+          <TableColumn>ACTIONS</TableColumn>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>
+                {user.first_name} {user.last_name}
+              </TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>
+                {user.role !== "admin" && (
+                  <Button
+                    size="sm"
+                    color="primary"
+                    isLoading={promoteToAdminMutation.isPending}
+                    onPress={() => promoteToAdminMutation.mutate(user.id)}
+                  >
+                    Make Admin
+                  </Button>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  // Loading and error states
   if (
     processingQuery.isLoading ||
     acceptedQuery.isLoading ||
-    rejectedQuery.isLoading
+    rejectedQuery.isLoading ||
+    usersQuery.isLoading
   )
     return <div>Loading...</div>;
-  if (processingQuery.isError || acceptedQuery.isError || rejectedQuery.isError)
-    return <div>Error fetching posts</div>;
+
+  if (
+    processingQuery.isError ||
+    acceptedQuery.isError ||
+    rejectedQuery.isError ||
+    usersQuery.isError
+  )
+    return <div>Error fetching data</div>;
 
   return (
     <>
       <Card className="w-full bg-black">
         <CardBody>
           <Tabs
-            aria-label="Post management tabs"
+            aria-label="Admin management tabs"
             color="primary"
             variant="solid"
             className="mb-4"
           >
-            <Tab key="processing" title="Processing">
-              {renderPostCards("processing")}
+            <Tab key="posts" title="Posts">
+              <Tabs>
+                <Tab key="processing" title="Processing">
+                  {renderPostCards("processing")}
+                </Tab>
+                <Tab key="accepted" title="Accepted">
+                  {renderPostCards("accepted")}
+                </Tab>
+                <Tab key="rejected" title="Rejected">
+                  {renderPostCards("rejected")}
+                </Tab>
+              </Tabs>
             </Tab>
-            <Tab key="accepted" title="Accepted">
-              {renderPostCards("accepted")}
-            </Tab>
-            <Tab key="rejected" title="Rejected">
-              {renderPostCards("rejected")}
+            <Tab key="users" title="Users">
+              <div className="mt-4">
+                {renderUsersTable()}
+                {usersQuery.hasNextPage && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      isLoading={usersQuery.isFetchingNextPage}
+                      onPress={() => usersQuery.fetchNextPage()}
+                    >
+                      Load More
+                    </Button>
+                  </div>
+                )}
+              </div>
             </Tab>
           </Tabs>
         </CardBody>
@@ -315,4 +455,4 @@ const PostManagementTabs: React.FC = () => {
   );
 };
 
-export default PostManagementTabs;
+export default AdminManagementTabs;
