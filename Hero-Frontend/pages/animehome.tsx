@@ -21,15 +21,20 @@ interface LetterConfig {
   imgPath: string;
 }
 
-interface NumberConfig {
+interface NumberItem {
   number: string;
   imgPath: string;
-  path: string;
 }
+
+// interface NumberConfig {
+//   number: string;
+//   imgPath: string;
+//   path: string;
+// }
 
 // The SVG path for the hourglass shape
 const hourglassPath =
-  "M437.854 928C437.854 956.257 456.674 981.009 483.853 988.668C643.774 1033.74 761 1180.78 761 1355.23V1918H0V1355.23C0 1180.78 117.226 1033.74 277.147 988.668C304.326 981.009 323.146 956.262 323.146 928C323.146 899.743 304.326 874.991 277.147 867.332C117.226 822.268 0 675.215 0 500.767V-62H761V500.767C761 675.215 643.774 822.264 483.853 867.332C456.674 874.991 437.854 899.738 437.854 928Z";
+  "M145 0V561.767L158.87 664L184.056 730L214.354 781L263.5 837.899L322 883.57C322 883.57 386.346 918.244 422.147 928.332H628.353C664.154 918.244 728.5 883.57 728.5 883.57L787 837.899L836.146 781L866.444 730L891.63 664L905.5 561.767V0H1051V959H0V0H145Z";
 
 const letters: LetterConfig[] = [
   { letter: "C", imgPath: "/shapes/c.svg" },
@@ -44,14 +49,60 @@ const letters: LetterConfig[] = [
   { letter: "n", imgPath: "/shapes/n2.svg" },
 ];
 
-const numbers = Array.from({ length: 10 }, (_, i) => ({
-  number: i.toString(),
-  path: `...your ${i} SVG path here...`,
-}));
+const numbers: NumberItem[] = [
+  { number: "0", imgPath: "/shapes/0.svg" },
+  { number: "1", imgPath: "/shapes/1.svg" },
+  { number: "2", imgPath: "/shapes/2.svg" },
+  { number: "3", imgPath: "/shapes/3.svg" },
+  { number: "4", imgPath: "/shapes/4.svg" },
+  { number: "5", imgPath: "/shapes/5.svg" },
+  { number: "6", imgPath: "/shapes/6.svg" },
+  { number: "7", imgPath: "/shapes/7.svg" },
+  { number: "8", imgPath: "/shapes/8.svg" },
+  { number: "9", imgPath: "/shapes/9.svg" },
+];
+
+function loadAndColorSVG(imgPath: string, color: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    fetch(imgPath)
+      .then((response) => response.text())
+      .then((svgText) => {
+        // Parse the SVG as a DOM element
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+
+        if (!svgElement) {
+          return reject('SVG element not found');
+        }
+
+        // Change the fill color of all paths in the SVG
+        const paths = svgElement.querySelectorAll('path');
+        paths.forEach((path) => {
+          path.setAttribute('fill', color);
+        });
+
+        // Serialize the updated SVG back to a string
+        const serializer = new XMLSerializer();
+        const updatedSvgText = serializer.serializeToString(svgElement);
+
+        // Convert the updated SVG string to a Blob and create an Object URL
+        const blob = new Blob([updatedSvgText], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+
+        // Resolve the updated image URL
+        resolve(url);
+      })
+      .catch((error) => {
+        console.error('Error loading or coloring SVG:', error);
+        reject(error);
+      });
+  });
+}
 
 const HourglassAnimation: React.FC<Props> = ({
-  hourGlassColor = "#ff5310",
-  comingSoonColor = "#100000",
+  hourGlassColor = "#ff2000",
+  comingSoonColor = "#FFFFFF",
   numbersColor = "#FFFFFF",
 }) => {
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -98,6 +149,7 @@ const HourglassAnimation: React.FC<Props> = ({
 
       // Create engine
       const engine = Engine.create();
+
       engineRef.current = engine;
 
       const width = window.innerWidth;
@@ -115,6 +167,7 @@ const HourglassAnimation: React.FC<Props> = ({
           pixelRatio: window.devicePixelRatio || 1,
         },
       });
+
       renderRef.current = render;
 
       // Create hourglass boundary
@@ -125,51 +178,89 @@ const HourglassAnimation: React.FC<Props> = ({
         {
           isStatic: true,
           render: {
-            fillStyle: "transparent",
-            strokeStyle: hourGlassColor,
-            lineWidth: 1,
+            fillStyle: "rgba(0, 255, 0, 0.5)",
           },
         }
       );
+
       World.add(engine.world, hourglass);
 
       // Add letters
       letters.forEach((letter, index) => {
-        const yPosition = index < 6 ? height * 0.2 : height * 0.3;
-        const xOffset = ((index % 6) - 2.5) * 50;
-
-        const letterBody = createSVGBodyFromPath(
-          letter.imgPath,
-          width / 2 + xOffset,
-          yPosition,
-          {
-            render: {
-              fillStyle: comingSoonColor,
-            },
-            restitution: 0.2,
-            friction: 0.1,
-            density: 0.001,
-          }
-        );
-        World.add(engine.world, letterBody);
+        if (letter.imgPath) {
+          const yPosition = index < 6 ? height * 0.2 : height * 0.3; // Position based on index
+          const xOffset = ((index % 6) - 2.5) * 50; // Adjust xOffset for alignment
+  
+          const color = comingSoonColor; // Use comingSoonColor as fill color
+  
+          // Load and color the SVG for the letter
+          loadAndColorSVG(letter.imgPath, color)
+            .then((coloredSVGUrl) => {
+              // Create a rectangle body and use the SVG as its texture
+              const letterBody = Bodies.rectangle(
+                width / 2 + xOffset,
+                yPosition,
+                100, // width of the body
+                200, // height of the body
+                {
+                  restitution: 0.2,
+                  friction: 0.1,
+                  density: 0.001,
+                  render: {
+                    sprite: {
+                      texture: coloredSVGUrl, // Use the colored SVG as the texture
+                      xScale: 1,
+                      yScale: 1,
+                    },
+                  },
+                }
+              );
+  
+              // Add the letter body to the Matter.js world
+              World.add(engine.world, letterBody);
+            })
+            .catch((error) => {
+              console.error('Error applying color to SVG:', error);
+            });
+        }
       });
+  
 
       // Add numbers
       numbers.forEach((number, index) => {
-        const numberBody = createSVGBodyFromPath(
-          number.path,
-          width / 2 + (index - 4.5) * 40,
-          height * 0.1,
-          {
-            render: {
-              fillStyle: numbersColor,
-            },
-            restitution: 0.7,
-            friction: 0.1,
-            density: 0.001,
-          }
-        );
-        World.add(engine.world, numberBody);
+        if (number.imgPath) {
+          const color = numbersColor; // Use numbersColor as fill color
+  
+          // Load and color the SVG for the number
+          loadAndColorSVG(number.imgPath, color)
+            .then((coloredSVGUrl) => {
+              const yPosition = -200; // Position numbers slightly above the letters
+  
+              // Create a rectangle body and use the SVG as its texture
+              const numberBody = Bodies.rectangle(
+                width / 2 + (index - 4) * 10, // Spread numbers horizontally
+                yPosition,
+                100, // width of the body
+                150, // height of the body
+                {
+                  restitution: 0.7,
+                  render: {
+                    sprite: {
+                      texture: coloredSVGUrl, // Use the colored SVG as the texture
+                      xScale: 1,
+                      yScale: 1,
+                    },
+                  },
+                }
+              );
+  
+              // Add the number body to the Matter.js world
+              World.add(engine.world, numberBody);
+            })
+            .catch((error) => {
+              console.error('Error applying color to SVG:', error);
+            });
+        }
       });
 
       // Add mouse interaction
@@ -183,6 +274,7 @@ const HourglassAnimation: React.FC<Props> = ({
           },
         },
       });
+
       World.add(engine.world, mouseConstraint);
 
       // Add gravity
@@ -190,6 +282,7 @@ const HourglassAnimation: React.FC<Props> = ({
 
       // Start simulation
       const runner = Runner.create();
+
       Runner.run(runner, engine);
       Render.run(render);
       runnerRef.current = runner;
@@ -228,14 +321,6 @@ const HourglassAnimation: React.FC<Props> = ({
       />
 
       {/* Static hourglass SVG for visual reference */}
-      <svg
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 z-0"
-        width="761"
-        height="1918"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d={hourglassPath} fill={hourGlassColor} />
-      </svg>
 
       {/* Noise overlay */}
       <div
