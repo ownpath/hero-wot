@@ -10,45 +10,63 @@ const UserModel = sequelize.define(
       primaryKey: true,
     },
     google_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       unique: true,
       allowNull: true,
     },
     first_name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(50),
+      allowNull: true,
       field: "first_name",
     },
     last_name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
       field: "last_name",
     },
     email: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
     },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+
     role: {
       type: DataTypes.ENUM("user", "admin", "chairman"),
       allowNull: false,
+      defaultValue: "user",
     },
     user_type: {
       type: DataTypes.ENUM("family", "friends", "work colleagues"),
       allowNull: true,
       defaultValue: null,
     },
+    designation: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     refresh_token: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     lastSignIn: {
       type: DataTypes.DATE,
       field: "last_sign_in",
+    },
+    email_confirmed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    email_confirmation_otp: {
+      type: DataTypes.STRING(6),
+      allowNull: true,
+      validate: {
+        is: /^[0-9]{6}$/,
+      },
+    },
+    email_confirmation_otp_expires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

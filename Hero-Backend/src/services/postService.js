@@ -3,13 +3,12 @@ const sequelize = require("sequelize");
 
 class PostService {
   async createPost(postData) {
-    const { title, body, userId, status, score, media } = postData;
+    const { body, userId, status, score, media } = postData;
 
     // Ensure media is an array
     const mediaArray = Array.isArray(media) ? media : [];
 
     return PostModel.create({
-      title,
       body,
       userId,
       status,
@@ -89,16 +88,24 @@ class PostService {
     });
   }
 
-  async approvePost(id, approverId) {
-    const post = await PostModel.findByPk(id);
-    if (post) {
-      post.status = "accepted";
-      post.approvedBy = approverId;
-      post.approvedAt = new Date();
-      await post.save();
-      return post;
+  async approvePost(postId, approverId) {
+    const updatedPost = await PostModel.update(
+      {
+        status: "accepted",
+        approved_by: approverId,
+        // approved_at will be set automatically by the trigger
+      },
+      {
+        where: { id: postId },
+        returning: true,
+      }
+    );
+
+    if (!updatedPost[0]) {
+      throw new Error("Post not found or could not be updated");
     }
-    return null;
+
+    return updatedPost[1][0]; // Return the updated post
   }
 }
 

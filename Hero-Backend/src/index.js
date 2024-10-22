@@ -1,18 +1,18 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const userRoutes = require('./routes/userRoutes.js')
-const postRoutes = require('./routes/postRoutes.js')
-const authRoutes = require('./routes/authRoutes.js')
-const {passport} = require('./auth/auth.js')
-const { connectDB, query } = require('./db');
-const cors = require("cors");
+const express = require("express");
+const dotenv = require("dotenv");
+const userRoutes = require("./routes/userRoutes.js");
+const postRoutes = require("./routes/postRoutes.js");
+const authRoutes = require("./routes/authRoutes.js");
+const adminRoutes = require("./routes/adminRoutes");
 
+const { passport } = require("./auth/auth.js");
+const { connectDB, query } = require("./db");
+const cors = require("cors");
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8080;
-
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -33,7 +33,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Pre-flight requests
-app.options('*', cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // Middlewares
 app.use(express.json());
@@ -41,18 +41,19 @@ app.use(express.json());
 app.use(passport.initialize());
 
 // Routes
-app.use('/users', userRoutes);
-app.use('/posts', postRoutes);
-app.use('/auth', authRoutes );
+app.use("/users", userRoutes);
+app.use("/posts", postRoutes);
+app.use("/auth", authRoutes);
+app.use("/admin", adminRoutes);
 
 // Test database connection
 (async () => {
   try {
     await connectDB();
-    const result = await query('SELECT NOW()');
-    console.log('Database connected:', result.rows[0].now);
+    const result = await query("SELECT NOW()");
+    console.log("Database connected:", result.rows[0].now);
   } catch (err) {
-    console.error('Database connection error:', err);
+    console.error("Database connection error:", err);
   }
 })();
 

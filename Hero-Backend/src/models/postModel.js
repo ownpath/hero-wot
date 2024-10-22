@@ -9,10 +9,6 @@ const PostModel = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     body: {
       type: DataTypes.TEXT,
       allowNull: false,

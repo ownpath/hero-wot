@@ -3,13 +3,10 @@ const UserService = require("../services/userService");
 class UserController {
   async createUser(req, res) {
     try {
-      const { first_name, last_name, email, role, password } = req.body;
+      const { email, role } = req.body;
       const user = await UserService.createUser({
-        first_name,
-        last_name,
         email,
         role,
-        password,
       });
       res.status(201).json(user);
     } catch (error) {
@@ -20,15 +17,15 @@ class UserController {
   async updateUser(req, res) {
     try {
       const id = parseInt(req.params.id, 10);
-      const { first_name, last_name, email, role, password, user_type } =
+      const { first_name, last_name, email, role, user_type, designation } =
         req.body;
       const updatedUser = await UserService.updateUser(id, {
         first_name,
         last_name,
         email,
         role,
-        password,
         user_type,
+        designation,
       });
       if (updatedUser) {
         res.json(updatedUser);
@@ -56,10 +53,37 @@ class UserController {
 
   async getAllUsers(req, res) {
     try {
-      const users = await UserService.getAllUsers();
-      res.json(users);
+      const { limit = 10, offset = 0, search = "", role = null } = req.query;
+
+      // Input validation
+      const parsedLimit = Math.min(parseInt(limit) || 10, 100); // Max 100 items per page
+      const parsedOffset = parseInt(offset) || 0;
+
+      if (parsedOffset < 0 || parsedLimit < 1) {
+        return res.status(400).json({
+          error: "Invalid pagination parameters",
+        });
+      }
+
+      // if (role && !["user", "admin", "chairman"].includes(role)) {
+      //   return res.status(400).json({
+      //     error: "Invalid role parameter",
+      //   });
+      // }
+
+      const result = await UserService.getAllUsers({
+        limit: parsedLimit,
+        offset: parsedOffset,
+        search: search.toString(),
+        role,
+      });
+
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Error fetching users:", error);
+      res.status(500).json({
+        error: error.message || "Error fetching users",
+      });
     }
   }
 

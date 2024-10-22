@@ -1,10 +1,38 @@
-// authRoutes.js
 const express = require("express");
 const { passport, generateTokens } = require("../auth/auth.js");
-const bcrypt = require("bcrypt");
 const UserService = require("../services/userService");
+const { sendConfirmationEmail } = require("../services/emailService");
 
 const router = express.Router();
+
+// Helper function to create user response object
+const createUserResponse = (
+  user,
+  accessToken,
+  refreshToken,
+  isNewUser = false,
+  message = ""
+) => {
+  return {
+    user: {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role,
+      email: user.email,
+    },
+    accessToken,
+    refreshToken,
+    isNewUser,
+    message,
+  };
+};
+
+// Helper function to redirect to frontend with data
+const redirectWithData = (res, data) => {
+  const encodedData = encodeURIComponent(JSON.stringify(data));
+  res.redirect(`${process.env.FRONTEND_URL}/auth-callback?data=${encodedData}`);
+};
 
 // Google OAuth routes
 router.get(
@@ -19,76 +47,85 @@ router.get(
     session: false,
   }),
   (req, res) => {
-    const { id, first_name, last_name, role, email, accessToken, isNewUser } =
-      req.user;
-    const redirectUrl = new URL(`${process.env.FRONTEND_URL}/completeprofile`);
-    redirectUrl.searchParams.append("id", id);
-    redirectUrl.searchParams.append("first_name", first_name);
-    redirectUrl.searchParams.append("last_name", last_name);
-    redirectUrl.searchParams.append("role", role);
-    redirectUrl.searchParams.append("email", email);
-    redirectUrl.searchParams.append("accessToken", accessToken);
-    redirectUrl.searchParams.append("isNewUser", isNewUser);
-
-    res.redirect(redirectUrl.toString());
+    const user = req.user;
+    const { accessToken, refreshToken } = generateTokens(user);
+    const message = user.isNewUser
+      ? "Successfully signed up with Google. Welcome!"
+      : "Successfully logged in with Google. Welcome back!";
+    const responseData = createUserResponse(
+      user,
+      accessToken,
+      refreshToken,
+      user.isNewUser,
+      message
+    );
+    redirectWithData(res, responseData);
   }
 );
 
-// Local authentication route
-router.post("/login", (req, res, next) => {
-  passport.authenticate("local", { session: false }, (err, user, info) => {
-    if (err || !user) {
-      return res.status(400).json({
-        message: info ? info.message : "Login failed",
-        user: user,
-      });
-    }
-
-    res.json({
-      message: "Login successful",
-      user: {
-        id: user.userId,
-        name: user.name,
-      },
-      accessToken: user.accessToken,
-      refreshToken: user.refreshToken,
-    });
-  })(req, res, next);
-});
-
-// Registration route
-router.post("/register", async (req, res) => {
+// Email authentication route - handles both login and registration
+router.post("/email-auth", async (req, res) => {
   try {
-    const { first_name, last_name, email, password, role } = req.body;
+    const { email } = req.body;
+    let user = await UserService.getUserByEmail(email);
+    let isNewUser = false;
 
-    const existingUser = await UserService.getUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await UserService.createUser({
+        email,
+        role: "user",
+      });
+      isNewUser = true;
+    } else {
+      // Update existing user's OTP
+      await UserService.updateUserOTP(user.id);
+      // // Send verification email
+      // await sendConfirmationEmail(user);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await UserService.createUser({
-      first_name,
-      last_name,
-      email,
-      password: hashedPassword,
-      role: role || "user",
-    });
-
-    const { accessToken, refreshToken } = generateTokens(newUser.id);
-
-    // Update user with refresh token
-    await UserService.updateUser(newUser.id, { refreshToken });
-
-    res.status(201).json({
-      message: "Registration successful",
-
-      accessToken,
-      refreshToken,
+    res.status(200).json({
+      message: `Verification email sent to ${email}. Please check your inbox.`,
+      userId: user.id,
+      isNewUser,
+      // Redirect to your existing email verification page
+      redirectTo: `/verify-email?userId=${user.id}&email=${encodeURIComponent(
+        email
+      )}`,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log("error deets", error);
+    res.status(500).json({
+      error: "Authentication failed. Please try again later.",
+    });
+  }
+});
+
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+    const user = await UserService.verifyEmailOTP(userId, otp);
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    const message = user.first_name
+      ? "Welcome back! Login successful."
+      : "Welcome! Please complete your profile.";
+
+    const isNewUser = !user.first_name;
+
+    const responseData = createUserResponse(
+      user,
+      accessToken,
+      refreshToken,
+      isNewUser,
+      message
+    );
+
+    res.json(responseData);
+  } catch (error) {
+    res.status(400).json({
+      error: error.message || "Email verification failed. Please try again.",
+    });
   }
 });
 
@@ -96,7 +133,7 @@ router.post("/register", async (req, res) => {
 router.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    return res.status(400).json({ message: "Refresh token is required" });
+    return res.status(400).json({ error: "Refresh token is required" });
   }
 
   try {
@@ -104,32 +141,29 @@ router.post("/refresh-token", async (req, res) => {
     const user = await UserService.getUserById(decoded.userId);
 
     if (!user || user.refreshToken !== refreshToken) {
-      return res.status(401).json({ message: "Invalid refresh token" });
+      return res
+        .status(401)
+        .json({ error: "Invalid refresh token. Please log in again." });
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      user.id
-    );
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
 
     // Update user with new refresh token
     await UserService.updateUser(user.id, { refreshToken: newRefreshToken });
 
-    res.json({ accessToken, refreshToken: newRefreshToken });
+    const responseData = createUserResponse(
+      user,
+      accessToken,
+      newRefreshToken,
+      false,
+      "Token refreshed successfully."
+    );
+    res.json(responseData);
   } catch (error) {
-    res.status(401).json({ message: "Invalid refresh token" });
+    res
+      .status(401)
+      .json({ error: "Token refresh failed. Please log in again." });
   }
 });
-
-// Protected route example
-router.get(
-  "/protected",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.json({
-      message: "You have access to this protected route",
-      user: req.user,
-    });
-  }
-);
 
 module.exports = router;

@@ -3,11 +3,11 @@ const PostService = require("../services/postService");
 class PostController {
   async createPost(req, res) {
     try {
-      const { title, body, userId, status, score, media } = req.body;
+      const { body, status, score, media } = req.body;
+      const userId = req.user.id;
 
       // media is already an array, no need to parse it
       const post = await PostService.createPost({
-        title,
         body,
         userId,
         status,
@@ -51,9 +51,8 @@ class PostController {
   async updatePost(req, res) {
     try {
       const id = parseInt(req.params.id, 10);
-      const { title, body, status, score } = req.body;
+      const { body, status, score } = req.body;
       const [updatedCount, updatedPosts] = await PostService.updatePost(id, {
-        title,
         body,
         status,
         score,
@@ -85,8 +84,7 @@ class PostController {
   async approvePost(req, res) {
     try {
       const id = parseInt(req.params.id, 10);
-      // const approverId = req.user.id; // Assuming you have user information in the request
-      const approverId = "15"; // Assuming you have user information in the request
+      const approverId = req.user.id; // Assuming you have user information in the request
 
       const approvedPost = await PostService.approvePost(id, approverId);
       if (approvedPost) {
