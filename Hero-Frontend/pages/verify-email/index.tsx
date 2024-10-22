@@ -68,13 +68,27 @@ const VerifyEmail = () => {
         userId,
         otp: otp.join(""),
       });
-      const authData = response.data;
+      const data = response.data;
 
-      localStorage.setItem("accessToken", authData.accessToken);
-      localStorage.setItem("refreshToken", authData.refreshToken);
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("firstName", data.user.first_name);
+      localStorage.setItem("lastName", data.user.last_name);
+      localStorage.setItem("isNewUser", data.isNewUser.toString());
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("userId", data.user.id.toString());
+      localStorage.setItem(
+        "userName",
+        `${data.user.first_name} ${data.user.last_name}`
+      );
+      localStorage.setItem("userRole", data.user.role);
 
-      toast.success(authData.message);
-      router.push("/completeprofile");
+      toast.success(data.message);
+      if (data.isNewUser === true) {
+        router.push("/completeprofile");
+      } else {
+        router.push("/postgreeting");
+      }
     } catch (error: any) {
       console.error("Email verification error:", error);
       toast.error(

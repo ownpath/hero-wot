@@ -11,6 +11,8 @@ import {
 } from "@nextui-org/react";
 import { toast } from "sonner";
 
+const API_URL = "http://localhost:8080";
+
 interface CompleteProfileFormProps {
   onComplete: (success: boolean) => void;
 }
@@ -29,14 +31,6 @@ export default function CompleteProfileForm({
   const [recognition, setRecognition] = useState("");
   const [designation, setDesignation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Load stored names from localStorage
-    const storedFirstName = localStorage.getItem("firstName");
-    const storedLastName = localStorage.getItem("lastName");
-    if (storedFirstName) setFirstName(storedFirstName);
-    if (storedLastName) setLastName(storedLastName);
-  }, []);
 
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRecognition(e.target.value);
@@ -58,7 +52,7 @@ export default function CompleteProfileForm({
 
     try {
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`,
+        `${API_URL}/users/${userId}`,
         {
           first_name: firstName,
           last_name: lastName,

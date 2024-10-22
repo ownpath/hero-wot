@@ -146,36 +146,47 @@ export default function BirthdayGreetingsForm() {
 
   const uploadFile = async (fileInfo: FileInfo) => {
     try {
-      const formData = new FormData();
-      formData.append("file", fileInfo.file);
-
-      const response = await authenticatedRequest({
+      const response = await fetch("/api/get-upload-url", {
         method: "POST",
-        url: "/upload",
-        data: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: fileInfo.name,
+          fileType: fileInfo.file.type,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to get upload URL");
+      }
+      const { url } = await response.json();
+      const uploadResponse = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url);
+        xhr.setRequestHeader("Content-Type", fileInfo.file.type);
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = (event.loaded / event.total) * 100;
+            console.log(
+              `Upload progress for ${fileInfo.name}: ${percentComplete.toFixed(2)}%`
             );
             setFiles((prevFiles) =>
               prevFiles.map((f) =>
                 f.name === fileInfo.name
-                  ? {
-                      ...f,
-                      uploadProgress: percentCompleted,
-                      uploadStatus: "uploading",
-                    }
+                  ? { ...f, uploadProgress: percentComplete }
                   : f
               )
             );
           }
-        },
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr);
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error("XHR error"));
+        xhr.send(fileInfo.file);
       });
-
       setFiles((prevFiles) =>
         prevFiles.map((f) =>
           f.name === fileInfo.name
@@ -183,14 +194,13 @@ export default function BirthdayGreetingsForm() {
                 ...f,
                 uploadStatus: "completed",
                 uploadProgress: 100,
-                uploadedUrl: response.data.url,
+                uploadedUrl: url.split("?")[0],
               }
             : f
         )
       );
-
       console.log("File uploaded successfully:", fileInfo.name);
-      return response.data.url;
+      return url.split("?")[0];
     } catch (error) {
       console.error(`Error uploading file ${fileInfo.name}:`, error);
       setFiles((prevFiles) =>
@@ -307,7 +317,7 @@ export default function BirthdayGreetingsForm() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
       <Card
-        className="w-full max-w-[842px] min-h-[556px] bg-[#000000] rounded-[4px] border border-[#FFFFFF33] mx-auto"
+        className="w-full max-w-[842px] min-h-[556px] bg-background-primary rounded-[4px] border border-[#FFFFFF33] mx-auto"
         radius="none"
       >
         <div className="p-[32px]">
