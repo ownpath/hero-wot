@@ -89,8 +89,8 @@ export default function CompleteProfileForm({
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
-      <Card className="w-[573px] min-h-[740px] p-11 bg-hourglass rounded-[4px] mx-auto">
-        <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
+      <Card className="w-[573px] min-h-[508px] p-11 bg-hourglass rounded-[4px] mx-auto">
+        <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[38px] pt-4 sm:pt-[44px] pb-3 px-0">
           <h1 className="font-ztNeueRalewe italic text-headingText text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
             Tell Us More About Yourself
           </h1>
@@ -115,10 +115,9 @@ export default function CompleteProfileForm({
                 classNames={{
                   base: "max-w-full",
                   label:
-                    "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
-                  input: "h-10 sm:h-[46px] bg-[#1C1C1C] text-white",
-                  inputWrapper:
-                    "h-10 sm:h-[46px] bg-[#1C1C1C] hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                    "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
+                  input: "h-10 sm:h-[46px] bg-labelField text-white",
+                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
                 }}
                 isRequired
               />
@@ -131,10 +130,9 @@ export default function CompleteProfileForm({
                 classNames={{
                   base: "max-w-full",
                   label:
-                    "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
-                  input: "h-10 sm:h-[46px] bg-[#1C1C1C] text-white",
-                  inputWrapper:
-                    "h-10 sm:h-[46px] bg-[#1C1C1C] hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                    "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
+                  input: "h-10 sm:h-[46px] bg-labelField text-white",
+                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
                 }}
                 isRequired
               />
@@ -146,9 +144,11 @@ export default function CompleteProfileForm({
                 onChange={handleSelectionChange}
                 classNames={{
                   base: "max-w-full",
-                  label: "text-[14px] font-medium mb-1.5 text-white",
-                  trigger: "h-[46px] bg-[#1C1C1C] text-white rounded-[4px]",
-                  value: "text-white",
+                  label:
+                    "text-[14px] font-semibold mb-1 text-headingText whitespace-nowrap",
+                  trigger:
+                    "h-[46px] bg-labelField text-enterHere rounded-[4px]",
+                  value: "text-headingText",
                 }}
                 isRequired
               >
@@ -167,16 +167,15 @@ export default function CompleteProfileForm({
                 classNames={{
                   base: "max-w-full",
                   label:
-                    "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
-                  input: "h-10 sm:h-[46px] bg-[#1C1C1C] text-white",
-                  inputWrapper:
-                    "h-10 sm:h-[46px] bg-[#1C1C1C] hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                    "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
+                  input: "h-10 sm:h-[46px] bg-labelField text-white",
+                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
                 }}
                 isRequired
               />
               <Button
                 type="submit"
-                className="mt-2 bg-[#EE2326] h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+                className="mt-2 bg-buttonBackground h-10 sm:h-[46px] rounded-[4px] text-buttonText text-sm md:text-[14px] font-semibold"
                 isLoading={isLoading}
               >
                 Continue

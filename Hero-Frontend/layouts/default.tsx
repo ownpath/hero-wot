@@ -10,9 +10,9 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen bg-background">
       <Head />
-      <div className="w-full max-w-8xl mx-auto px-6 pt-4">
+      {/* <div className="w-full max-w-8xl mx-auto px-6 pt-4">
         <Navbar />
-      </div>
+      </div> */}
       <main className="container mx-auto max-w-7xl px-6 flex-grow ">
         {children}
       </main>

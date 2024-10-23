@@ -56,11 +56,6 @@ export default function LoginForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -100,12 +95,12 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center">
       <Card
-        className="w-full max-w-[573px] min-h-[740px] p-4 sm:p-8 md:p-11 bg-hourglass rounded-[4px] border border-[#FFFFFF33] mx-auto items-center justify-center"
+        className="w-full max-w-[573px] min-h-[456px] p-4 sm:p-8 md:p-11 bg-hourglass rounded-[4px] mx-auto items-center justify-center"
         radius="none"
       >
         <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-          <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
-            Welcome
+          <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-[32px] md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
+            Create Your Account
           </h1>
           <p className="w-full text-headingText sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
             Share your thoughts, wishes, or stories. You can write a message,
@@ -114,9 +109,9 @@ export default function LoginForm() {
         </CardHeader>
 
         <CardBody className=" items-center justify-center">
-          <div className="w-full sm:w-[364px] flex flex-col justify-center sm:mt-12">
+          <div className="w-full sm:w-[364px] flex flex-col justify-center sm:mt-[46px]">
             <form
-              className="flex flex-col gap-4 sm:gap-6"
+              className="flex flex-col gap-5 sm:gap-6"
               onSubmit={handleSubmit}
             >
               <Input
@@ -128,12 +123,11 @@ export default function LoginForm() {
                 value={email}
                 onValueChange={setEmail}
                 classNames={{
-                  base: "max-w-full",
+                  base: "max-w-full bg-red-100",
                   label:
-                    "text-sm md:text-[14px] font-medium mb-1 sm:mb-1.5 text-white",
+                    "text-sm md:text-[14px] font-medium mb-0.5 sm:mb-1 text-white",
                   input: "h-10 sm:h-[46px] text-headingText text-white",
-                  inputWrapper:
-                    "h-10 sm:h-[46px] bg-labelField hover:!bg-[#1C1C1C] focus-within:!bg-[#1C1C1C] rounded-[4px]",
+                  inputWrapper: "h-10 sm:h-[48px] bg-labelField rounded-[4px]",
                 }}
                 isRequired
               />
@@ -141,25 +135,25 @@ export default function LoginForm() {
               {error && <p className="text-danger text-sm">{error}</p>}
               <Button
                 type="submit"
-                className="mt-2 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+                className="mt-[4px] bg-buttonBackground text-buttonText h-10 sm:h-[48px] rounded-[4px] text-base md:text-[14px] font-medium"
                 radius="none"
                 isLoading={isLoading}
               >
                 Log In
               </Button>
             </form>
-            <div className="my-4 sm:my-6">
+            <div className="my-4 sm:my-[18px]">
               <div className="flex items-center">
-                <div className="flex-grow h-[1px] bg-[#FFFFFF33]"></div>
-                <span className="px-4 text-sm md:text-[14px] text-[#FFFFFF80]">
+                <div className="flex-grow h-[0.5px] bg-headingText"></div>
+                <span className="px-4 text-sm sm:text-[18px] text-headingText">
                   or
                 </span>
-                <div className="flex-grow h-[1px] bg-[#FFFFFF33]"></div>
+                <div className="flex-grow h-[0.5px] bg-headingText"></div>
               </div>
             </div>
             <Button
               radius="none"
-              className="w-full bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              className="w-full bg-white text-black border border-black h-10 sm:h-[48px] rounded-[4px] text-base md:text-[14px] font-medium"
               startContent={<GoogleIcon />}
               onPress={handleGoogleLogin}
             >

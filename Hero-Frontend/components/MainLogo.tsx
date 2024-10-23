@@ -15,7 +15,7 @@ const MainLogo = ({
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      <g clip-path="url(#clip0_3_106)">
+      <g clipPath="url(#clip0_3_106)">
         <path
           d="M67.408 66.7921C67.4207 66.7851 67.432 66.7794 67.4404 66.7752C67.4419 66.7752 67.4433 66.7738 67.4447 66.7724C67.4461 66.771 67.4306 66.7794 67.408 66.7921Z"
           fill="currentColor"

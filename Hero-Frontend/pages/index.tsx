@@ -6,7 +6,6 @@ import { Button } from "@nextui-org/button";
 import HourglassContainer from "@/components/HourglassContainer";
 import MainLogo from "@/components/MainLogo";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { getTailwindColor } from "./animehome";
 
 const CombinedHourglass = () => {
   const router = useRouter();
@@ -51,9 +50,9 @@ const CombinedHourglass = () => {
           {/* Physics Animation Layer */}
           <div className="absolute inset-0 z-10">
             <HourglassAnimation
-              hourGlassColor={getTailwindColor("text-hourglass")}
-              comingSoonColor={getTailwindColor("text-comingSoon")}
-              numbersColor={getTailwindColor("text-numbers")}
+              hourGlassColor="#ff2000"
+              comingSoonColor="#FF0000"
+              numbersColor="#FFFFFF"
             />
           </div>
 

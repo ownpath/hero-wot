@@ -17,6 +17,7 @@ import {
   FileVideo,
   X,
   Send,
+  User,
 } from "lucide-react";
 import authenticatedRequest from "../config/authenticatedRequest";
 
@@ -41,8 +42,16 @@ export default function BirthdayGreetingsForm() {
   const [fileError, setFileError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
 
   useEffect(() => {
+    // Get email from localStorage
+    const email = localStorage.getItem("userEmail");
+    if (email) {
+      setUserEmail(email);
+    }
+
     // Cleanup function to revoke object URLs
     return () => {
       Object.values(previewUrls).forEach(URL.revokeObjectURL);
@@ -247,6 +256,7 @@ export default function BirthdayGreetingsForm() {
 
       setGreetings("");
       setFiles([]);
+      setIsSubmitSuccess(true);
       console.log("Form reset");
     } catch (error: any) {
       console.error("Error submitting form:", error);
@@ -312,12 +322,38 @@ export default function BirthdayGreetingsForm() {
     }
   };
 
+  if (isSubmitSuccess) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center p-4">
+        <Card
+          className="w-full max-w-[842px] min-h-[604px] bg-hourglass rounded-[4px] mx-auto"
+          radius="none"
+        >
+          <div className="p-4 sm:p-6 md:p-[32px] h-full flex items-center justify-center">
+            <div className="text-center max-w-[700px]">
+              <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] mb-6">
+                Thank You For Your Message!
+              </h1>
+              <p className="text-headingText text-base sm:text-lg md:text-xl leading-relaxed">
+                Your message has been added to the Wall of Wishes,
+                <br />
+                and will be unveiled on 29th October 2024. You've made
+                <br />
+                this celebration even more special!
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   const isFormValid = greetings.trim() !== "";
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
       <Card
-        className="w-full max-w-[842px] min-h-[556px] bg-hourglass rounded-[4px] mx-auto"
+        className="w-full max-w-[842px] min-h-[604px] bg-hourglass rounded-[4px] mx-auto"
         radius="none"
       >
         <div className="p-4 sm:p-6 md:p-[32px]">
@@ -334,7 +370,7 @@ export default function BirthdayGreetingsForm() {
 
           <CardBody className="p-0 mt-4 sm:mt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="w-full bg-[#323337] rounded-[4px] p-3 sm:p-4 md:p-6">
+              <div className="w-full h-[372px] bg-[#323337] rounded-[4px] p-3 sm:p-4 md:p-6">
                 <div className="h-full flex flex-col justify-between">
                   <Textarea
                     placeholder="Write your message here.."
@@ -349,16 +385,16 @@ export default function BirthdayGreetingsForm() {
                       inputWrapper: "border-none h-full",
                     }}
                   />
-                  <div className="w-full h-[1px] bg-[#FFFFFF33] my-4" />
+                  <div className="w-full h-[1px] bg-[#FFFFFF33] my-1" />
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 pt-4">
                     <div className="w-full sm:w-auto">
                       <div
                         {...getRootProps()}
-                        className="w-full sm:w-auto flex gap-2 items-center justify-center bg-[#666972] hover:bg-[#404040] transition-colors text-white rounded px-4 py-2 cursor-pointer"
+                        className="w-full sm:w-auto flex gap-2 items-center justify-center bg-buttonBackground transition-colors rounded px-4 py-4 cursor-pointer"
                       >
                         <input {...getInputProps()} />
-                        <span className="text-sm sm:text-base">
+                        <span className="text-sm sm:text-sm text-buttonText">
                           Attach Image or Video
                         </span>
                       </div>
@@ -372,7 +408,7 @@ export default function BirthdayGreetingsForm() {
                     <Button
                       type="submit"
                       startContent={<Send />}
-                      className="w-full sm:w-auto bg-[#D92D20] hover:bg-[#F04438] transition-colors text-white rounded px-6 py-2"
+                      className="w-full h-[48px] sm:w-auto bg-buttonBackground text-buttonText transition-colors rounded-[4px] px-4 py-4"
                       isDisabled={!isFormValid || isUploading}
                       isLoading={isUploading}
                     >
@@ -381,6 +417,15 @@ export default function BirthdayGreetingsForm() {
                   </div>
                 </div>
               </div>
+              {userEmail && (
+                <div className="flex items-center justify-start text-sm text-headingText mt-2">
+                  <User size={12} className="mr-1" />
+                  <div className="flex flex-row gap-x-1.5">
+                    <span>Logged in with </span>
+                    <span className="font-semibold"> {userEmail}</span>
+                  </div>
+                </div>
+              )}
 
               {files.length > 0 && (
                 <div className="mt-4 space-y-4">

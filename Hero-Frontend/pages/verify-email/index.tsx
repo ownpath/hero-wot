@@ -122,7 +122,7 @@ const VerifyEmail = () => {
             onSubmit={handleSubmit}
             className="flex flex-col items-center w-full"
           >
-            <div className="flex justify-center space-x-2 sm:space-x-3 w-full">
+            <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 w-full">
               {otp.map((digit, index) => (
                 <React.Fragment key={index}>
                   <input
@@ -137,17 +137,18 @@ const VerifyEmail = () => {
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className="w-[38px] h-14 text-center text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
+                    className="w-[32px] h-10 sm:w-[38px] sm:h-14 text-center text-lg sm:text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
                   />
                   {index === 2 && (
-                    <span className="text-2xl self-center">-</span>
+                    <span className="text-lg sm:text-2xl self-center">-</span>
                   )}
                 </React.Fragment>
               ))}
             </div>
+
             <Button
               type="submit"
-              className="mt-2 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              className="mt-4 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
               radius="none"
               isLoading={isLoading}
             >
