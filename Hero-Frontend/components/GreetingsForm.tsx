@@ -43,7 +43,7 @@ export default function BirthdayGreetingsForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(true);
 
   useEffect(() => {
     // Get email from localStorage
@@ -326,12 +326,12 @@ export default function BirthdayGreetingsForm() {
     return (
       <div className="min-h-screen w-full flex items-center justify-center p-4">
         <Card
-          className="w-full max-w-[842px] min-h-[604px] bg-hourglass rounded-[4px] mx-auto"
+          className="w-full max-w-[842px] min-h-[604px] items-center justify-center bg-hourglass rounded-[4px] mx-auto"
           radius="none"
         >
           <div className="p-4 sm:p-6 md:p-[32px] h-full flex items-center justify-center">
             <div className="text-center max-w-[700px]">
-              <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] mb-6">
+              <h1 className="font-ztNeueRalewe italic text-3xl text-headingText sm:text-5xl md:text-5xl font-bold leading-tight sm:leading-[38px] mb-4">
                 Thank You For Your Message!
               </h1>
               <p className="text-headingText text-base sm:text-lg md:text-xl leading-relaxed">
