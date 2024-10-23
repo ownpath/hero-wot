@@ -117,7 +117,17 @@ const HourglassAnimation: React.FC<Props> = ({
     options: Matter.IBodyDefinition
   ) => {
     const vertices = createVerticesFromSVGPath(path);
-    return Matter.Bodies.fromVertices(x, y, [vertices], options, true);
+    const scaleFactor: number =
+      window.innerWidth > 761 ? 1 : window.innerWidth / 761;
+    const centerPoint: Matter.Vector = Matter.Vertices.centre(vertices);
+    const scaledVertices = Matter.Vertices.scale(
+      vertices,
+      scaleFactor,
+      scaleFactor,
+      centerPoint
+    );
+
+    return Matter.Bodies.fromVertices(x, y, [scaledVertices], options, true);
   };
 
   const cleanup = () => {
@@ -176,7 +186,7 @@ const HourglassAnimation: React.FC<Props> = ({
       const hourglass = createSVGBodyFromPath(
         hourglassPath,
         width / 2,
-        height / 1.15,
+        window.innerWidth > 761 ? 700 : (window.innerWidth / 761) * 700,
         {
           isStatic: true,
           render: {
@@ -202,8 +212,8 @@ const HourglassAnimation: React.FC<Props> = ({
               const letterBody = Bodies.rectangle(
                 width / 2 + xOffset,
                 yPosition,
-                100, // width of the body
-                200, // height of the body
+                window.innerWidth > 761 ? 120 : (window.innerWidth / 761) * 120, // width of the body
+                window.innerWidth > 761 ? 200 : (window.innerWidth / 761) * 200, // height of the body
                 {
                   restitution: 0.2,
                   friction: 0.1,
@@ -211,8 +221,10 @@ const HourglassAnimation: React.FC<Props> = ({
                   render: {
                     sprite: {
                       texture: coloredSVGUrl, // Use the colored SVG as the texture
-                      xScale: 1,
-                      yScale: 1,
+                      xScale:
+                        window.innerWidth > 761 ? 1 : window.innerWidth / 761,
+                      yScale:
+                        window.innerWidth > 761 ? 1 : window.innerWidth / 761,
                     },
                   },
                 }
@@ -241,8 +253,8 @@ const HourglassAnimation: React.FC<Props> = ({
               const numberBody = Bodies.rectangle(
                 width / 2 + (index - 4) * 100, // Spread numbers horizontally
                 yPosition,
-                100, // width of the body
-                150, // height of the body
+                window.innerWidth > 761 ? 100 : (window.innerWidth / 761) * 100, // width of the body
+                window.innerWidth > 761 ? 150 : (window.innerWidth / 761) * 150, // height of the body
                 {
                   restitution: 0.7,
                   render: {
