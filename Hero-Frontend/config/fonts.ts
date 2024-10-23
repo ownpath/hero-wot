@@ -1,4 +1,10 @@
 import localFont from "next/font/local";
+import { Playfair_Display } from "next/font/google";
+
+export const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
 
 export const montserrat = localFont({
   src: [
@@ -73,4 +79,5 @@ export const ztNeueRalewe = localFont({
 export const fonts = {
   montserrat: montserrat.style.fontFamily,
   ztNeueRalewe: ztNeueRalewe.style.fontFamily,
+  playfair: playfair.style.fontFamily,
 };

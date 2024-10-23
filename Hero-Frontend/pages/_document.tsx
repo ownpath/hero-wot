@@ -1,6 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import { clsx } from "clsx";
-import { montserrat, ztNeueRalewe } from "@/config/fonts";
+import { montserrat, ztNeueRalewe, playfair } from "@/config/fonts";
 
 export default function Document() {
   return (
@@ -10,7 +10,8 @@ export default function Document() {
         className={clsx(
           "min-h-screen bg-background antialiased",
           montserrat.variable,
-          ztNeueRalewe.variable
+          ztNeueRalewe.variable,
+          playfair.variable
         )}
       >
         <Main />

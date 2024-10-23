@@ -7,15 +7,10 @@ interface Props {
   hourGlassColor?: string;
   comingSoonColor?: string;
   numbersColor?: string;
+  hourGlassClass?: string;
+  comingSoonClass?: string;
+  numbersClass?: string;
 }
-
-// Interfaces
-interface Props {
-  hourGlassColor?: string;
-  comingSoonColor?: string;
-  numbersColor?: string;
-}
-
 interface LetterConfig {
   letter: string;
   imgPath: string;
@@ -61,6 +56,15 @@ const numbers: NumberItem[] = [
   { number: "8", imgPath: "/shapes/8.svg" },
   { number: "9", imgPath: "/shapes/9.svg" },
 ];
+
+export const getTailwindColor = (className: string): string => {
+  const tempEl = document.createElement("div");
+  tempEl.className = className;
+  document.body.appendChild(tempEl);
+  const color = window.getComputedStyle(tempEl).color;
+  document.body.removeChild(tempEl);
+  return color;
+};
 
 function loadAndColorSVG(imgPath: string, color: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -277,18 +281,18 @@ const HourglassAnimation: React.FC<Props> = ({
       });
 
       // Add mouse interaction
-      const mouse = Mouse.create(render.canvas);
-      const mouseConstraint = MouseConstraint.create(engine, {
-        mouse: mouse,
-        constraint: {
-          stiffness: 0.2,
-          render: {
-            visible: false,
-          },
-        },
-      });
+      // const mouse = Mouse.create(render.canvas);
+      // const mouseConstraint = MouseConstraint.create(engine, {
+      //   mouse: mouse,
+      //   constraint: {
+      //     stiffness: 0.2,
+      //     render: {
+      //       visible: false,
+      //     },
+      //   },
+      // });
 
-      World.add(engine.world, mouseConstraint);
+      // World.add(engine.world, mouseConstraint);
 
       // Add gravity
       engine.world.gravity.y = 0.5;
@@ -301,7 +305,7 @@ const HourglassAnimation: React.FC<Props> = ({
       runnerRef.current = runner;
 
       // Keep the mouse in sync with rendering
-      render.mouse = mouse;
+      // render.mouse = mouse;
     } catch (error) {
       console.error("Error initializing scene:", error);
     }

@@ -31,9 +31,26 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
     Other: ["vida", "past-history"],
   };
 
-  // Cycle through themes in sequence
+  // Get all themes in a flat array
+  const allThemes = Object.values(themeGroups).flat();
+
+  // Function to get a random theme
+  const getRandomTheme = () => {
+    const randomIndex = Math.floor(Math.random() * allThemes.length);
+    return allThemes[randomIndex];
+  };
+
+  // Set random theme on every mount
+  useEffect(() => {
+    setIsMounted(true);
+    if (typeof window !== "undefined") {
+      const randomTheme = getRandomTheme();
+      setTheme(randomTheme);
+    }
+  }, []);
+
+  // Cycle through themes in sequence when clicked
   const cycleTheme = () => {
-    const allThemes = Object.values(themeGroups).flat();
     const currentIndex = allThemes.indexOf(theme || allThemes[0]);
     const nextIndex = (currentIndex + 1) % allThemes.length;
     setTheme(allThemes[nextIndex]);
@@ -44,10 +61,6 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
       isSelected: false,
       onChange: cycleTheme,
     });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   //prevent hydration mismatch
   if (!isMounted) return <div className="w-6 h-6" />;
