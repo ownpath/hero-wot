@@ -337,7 +337,7 @@ export default function BirthdayGreetingsForm() {
               <p className="text-headingText text-base sm:text-lg md:text-xl leading-relaxed">
                 Your message has been added to the Wall of Wishes,
                 <br />
-                and will be unveiled on 29th October 2024. You've made
+                and will be unveiled on 29th October 2024. You&apos;ve made
                 <br />
                 this celebration even more special!
               </p>
