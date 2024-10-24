@@ -31,7 +31,7 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen bg-background">
       <Head />
-      <Toaster position="top-center" expand={true} richColors />
+      <Toaster position="bottom-right" expand={true} richColors />
       <div className="w-full max-w-8xl mx-auto px-6 pt-4 bg-background">
         <div className="flex justify-between items-center">
           <MainLogo className="w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-hourglass " />

@@ -20,7 +20,9 @@ interface CompleteProfileFormProps {
 const recognitionOptions = [
   { value: "family", label: "Family" },
   { value: "friends", label: "Friends" },
-  { value: "work colleagues", label: "Work colleagues" },
+  { value: "team hero", label: "Team Hero" },
+  { value: "business partners", label: "Business Partners" },
+  { value: "proud hero owner", label: "Proud Hero Owner" },
 ];
 
 export default function CompleteProfileForm({

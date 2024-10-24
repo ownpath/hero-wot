@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
 import { Button, Card, CardBody, CardHeader } from "@nextui-org/react";
+import DefaultLayout from "@/layouts/default";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -101,63 +102,65 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <Toaster position="top-center" expand={true} richColors />
-      <Card className="w-full max-w-[573px] min-h-[280px] p-[44px] items-center justify-center bg-hourglass rounded-[4px] mx-auto ">
-        <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-          <h1
-            className="font-ztNeueRalewe italic text-headingText text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3"
-            style={{ fontFamily: "serif" }}
-          >
-            We&apos;ve Sent You An Email!
-          </h1>
-          <p className="w-full sm:max-w-[453px] text-headingText text-sm md:text-[14px] leading-normal sm:leading-[21px] text-center">
-            We&apos;ve just sent you a code to your email address.
-            <br />
-            You can paste the code you&apos;ve received below.
-          </p>
-        </CardHeader>
-        <CardBody className="flex flex-col max-w-full items-center justify-center py-2 sm:py-8 px-8">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col items-center w-full space-y-4 sm:space-y-6"
-          >
-            <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 w-full">
-              {otp.map((digit, index) => (
-                <React.Fragment key={index}>
-                  <input
-                    ref={(el) => {
-                      inputRefs.current[index] = el;
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="\d*"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onPaste={handlePaste}
-                    className="w-[32px] h-10 sm:w-[38px] sm:h-14 text-center text-lg sm:text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
-                  />
-                  {index === 2 && (
-                    <span className="text-lg sm:text-2xl self-center">-</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            <Button
-              type="submit"
-              className="bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-md md:text-[14px] font-semibold"
-              radius="none"
-              isLoading={isLoading}
+    <DefaultLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <Toaster position="top-center" expand={true} richColors />
+        <Card className="w-full max-w-[573px] min-h-[280px] p-[44px] items-center justify-center bg-hourglass rounded-[4px] mx-auto ">
+          <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
+            <h1
+              className="font-ztNeueRalewe italic text-headingText text-2xl sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3"
+              style={{ fontFamily: "serif" }}
             >
-              Submit
-            </Button>
-          </form>
-        </CardBody>
-      </Card>
-    </div>
+              We&apos;ve Sent You An Email!
+            </h1>
+            <p className="w-full sm:max-w-[453px] text-headingText text-sm md:text-[14px] leading-normal sm:leading-[21px] text-center">
+              We&apos;ve just sent you a code to your email address.
+              <br />
+              You can paste the code you&apos;ve received below.
+            </p>
+          </CardHeader>
+          <CardBody className="flex flex-col max-w-full items-center justify-center py-2 sm:py-8 px-8">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col items-center w-full space-y-4 sm:space-y-6"
+            >
+              <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 w-full">
+                {otp.map((digit, index) => (
+                  <React.Fragment key={index}>
+                    <input
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d*"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      className="w-[32px] h-10 sm:w-[38px] sm:h-14 text-center text-lg sm:text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
+                    />
+                    {index === 2 && (
+                      <span className="text-lg sm:text-2xl self-center">-</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <Button
+                type="submit"
+                className="bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-md md:text-[14px] font-semibold"
+                radius="none"
+                isLoading={isLoading}
+              >
+                Submit
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
+      </div>
+    </DefaultLayout>
   );
 };
 
