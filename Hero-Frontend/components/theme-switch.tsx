@@ -98,7 +98,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
           ),
         })}
       >
-        <Palette size={22} />
+        <Palette size={48} opacity={0} />
       </div>
     </Component>
   );

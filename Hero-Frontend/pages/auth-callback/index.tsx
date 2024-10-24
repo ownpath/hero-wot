@@ -16,7 +16,6 @@ const AuthCallback = () => {
           const dataString = Array.isArray(data) ? data[0] : data;
           const decodedData = JSON.parse(decodeURIComponent(dataString));
 
-          console.log("decoded data", decodedData);
 
           if (decodedData.error) {
             console.error("Authentication error:", decodedData.error);

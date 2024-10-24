@@ -20,6 +20,7 @@ import {
   User,
 } from "lucide-react";
 import authenticatedRequest from "../config/authenticatedRequest";
+import { useRouter } from "next/router";
 
 type FileType = "image" | "video" | "audio";
 
@@ -43,7 +44,9 @@ export default function BirthdayGreetingsForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isSubmitSuccess, setIsSubmitSuccess] = useState(true);
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     // Get email from localStorage
@@ -57,6 +60,23 @@ export default function BirthdayGreetingsForm() {
       Object.values(previewUrls).forEach(URL.revokeObjectURL);
     };
   }, [previewUrls]);
+
+  // Updated useEffect with correct timer type
+  useEffect(() => {
+    let redirectTimer: number;
+
+    if (isSubmitSuccess) {
+      redirectTimer = window.setTimeout(() => {
+        router.push("/");
+      }, 5000);
+    }
+
+    return () => {
+      if (redirectTimer) {
+        window.clearTimeout(redirectTimer);
+      }
+    };
+  }, [isSubmitSuccess, router]);
 
   const allowedTypes: Record<FileType, string[]> = {
     image: [
@@ -208,7 +228,7 @@ export default function BirthdayGreetingsForm() {
             : f
         )
       );
-      console.log("File uploaded successfully:", fileInfo.name);
+
       return url.split("?")[0];
     } catch (error) {
       console.error(`Error uploading file ${fileInfo.name}:`, error);
@@ -244,15 +264,11 @@ export default function BirthdayGreetingsForm() {
         media: media,
       };
 
-      console.log("Sending post data:", postData);
-
       const response = await authenticatedRequest({
         method: "POST",
         url: "/posts",
         data: postData,
       });
-
-      console.log("Server response:", response.data);
 
       setGreetings("");
       setFiles([]);
@@ -326,20 +342,23 @@ export default function BirthdayGreetingsForm() {
     return (
       <div className="min-h-screen w-full flex items-center justify-center p-4">
         <Card
-          className="w-full max-w-[842px] min-h-[604px] items-center justify-center bg-hourglass rounded-[4px] mx-auto"
+          className="w-full max-w-[842px] min-h-[500px] items-center justify-center bg-hourglass rounded-[4px] mx-auto"
           radius="none"
         >
           <div className="p-4 sm:p-6 md:p-[32px] h-full flex items-center justify-center">
             <div className="text-center max-w-[700px]">
               <h1 className="font-ztNeueRalewe italic text-3xl text-headingText sm:text-5xl md:text-5xl font-bold leading-tight sm:leading-[38px] mb-4">
-                Thank You For Your Message!
+                Thank You For Being Part Of This Special Celebration!
               </h1>
               <p className="text-headingText text-base sm:text-lg md:text-xl leading-relaxed">
                 Your message has been added to the Wall of Wishes,
                 <br />
-                and will be unveiled on 29th October 2024. You&apos;ve made
+                and will be unveiled on 29th October. You&apos;ve made
                 <br />
                 this celebration even more special!
+              </p>
+              <p className="text-headingText text-sm mt-4">
+                Redirecting to home page in 5 seconds...
               </p>
             </div>
           </div>
@@ -358,8 +377,8 @@ export default function BirthdayGreetingsForm() {
       >
         <div className="p-4 sm:p-6 md:p-[32px]">
           <CardHeader className="flex flex-col items-start justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
-            <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
-              Create your wishes for the Chairman
+            <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-3xl md:text-[32px] font-bold leading-tight sm:leading-[38px] text-start mb-2 sm:mb-3">
+              Share Your Heartfelt Wishes for the Chairman{" "}
             </h1>
             <p className="w-full text-headingText sm:max-w-[571px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-start">
               Share your thoughts, wishes, or stories. You can write a message,{" "}
@@ -417,15 +436,6 @@ export default function BirthdayGreetingsForm() {
                   </div>
                 </div>
               </div>
-              {userEmail && (
-                <div className="flex items-center justify-start text-sm text-headingText mt-2">
-                  <User size={12} className="mr-1" />
-                  <div className="flex flex-row gap-x-1.5">
-                    <span>Logged in with </span>
-                    <span className="font-semibold"> {userEmail}</span>
-                  </div>
-                </div>
-              )}
 
               {files.length > 0 && (
                 <div className="mt-4 space-y-4">
@@ -467,6 +477,15 @@ export default function BirthdayGreetingsForm() {
                       />
                     </div>
                   ))}
+                </div>
+              )}
+              {userEmail && (
+                <div className="flex items-center justify-start text-sm text-headingText mt-2">
+                  <User size={12} className="mr-1" />
+                  <div className="flex flex-row gap-x-1.5 whitespace-nowrap">
+                    <span>Logged in with</span>
+                    <span className="font-semibold">{userEmail}</span>
+                  </div>
                 </div>
               )}
             </form>

@@ -13,8 +13,6 @@ import { toast } from "sonner";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("env", API_URL);
-
 interface CompleteProfileFormProps {
   onComplete: (success: boolean) => void;
 }

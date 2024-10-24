@@ -117,10 +117,10 @@ const VerifyEmail = () => {
             You can paste the code you&apos;ve received below.
           </p>
         </CardHeader>
-        <CardBody className="flex flex-col max-w-full items-center justify-center py-10 px-8">
+        <CardBody className="flex flex-col max-w-full items-center justify-center py-2 sm:py-8 px-8">
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col items-center w-full"
+            className="flex flex-col items-center w-full space-y-4 sm:space-y-6"
           >
             <div className="flex justify-center space-x-1 sm:space-x-2 md:space-x-3 w-full">
               {otp.map((digit, index) => (
@@ -148,7 +148,7 @@ const VerifyEmail = () => {
 
             <Button
               type="submit"
-              className="mt-4 bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-sm md:text-[14px] font-semibold"
+              className="bg-buttonBackground text-buttonText h-10 sm:h-[46px] rounded-[4px] text-md md:text-[14px] font-semibold"
               radius="none"
               isLoading={isLoading}
             >

@@ -2,7 +2,6 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("authentic req", API_BASE_URL);
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });

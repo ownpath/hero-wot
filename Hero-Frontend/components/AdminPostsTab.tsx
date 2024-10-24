@@ -287,7 +287,6 @@ const AdminManagementTabs: React.FC = () => {
   const renderUsersTable = () => {
     const users = usersQuery.data?.pages.flatMap((page) => page.users) || [];
 
-    console.log("users from admin", users);
 
     return (
       <Table aria-label="Users table">
