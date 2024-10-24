@@ -234,7 +234,7 @@ const CombinedHourglass = () => {
                   >
                     A Tale Awaits
                   </h1>
-                  {/* Description Text */}
+
                   <p
                     className="text-becomePartOfStory text-center mx-auto
                     text-[12px] mb-3

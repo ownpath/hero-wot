@@ -116,8 +116,8 @@ export default function CompleteProfileForm({
                   base: "max-w-full",
                   label:
                     "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
-                  input: "h-10 sm:h-[46px] bg-labelField text-white",
-                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
+
+                  inputWrapper: "h-10 sm:h-[46px] bg-input rounded-[4px]",
                 }}
                 isRequired
               />
@@ -131,8 +131,8 @@ export default function CompleteProfileForm({
                   base: "max-w-full",
                   label:
                     "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
-                  input: "h-10 sm:h-[46px] bg-labelField text-white",
-                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
+
+                  inputWrapper: "h-10 sm:h-[46px] bg-input rounded-[4px]",
                 }}
                 isRequired
               />
@@ -146,8 +146,7 @@ export default function CompleteProfileForm({
                   base: "max-w-full",
                   label:
                     "text-[14px] font-semibold mb-1 text-headingText whitespace-nowrap",
-                  trigger:
-                    "h-[46px] bg-labelField text-enterHere rounded-[4px]",
+                  trigger: "h-[46px] bg-input text-placeHolder rounded-[4px]",
                   value: "text-headingText",
                 }}
                 isRequired
@@ -168,8 +167,8 @@ export default function CompleteProfileForm({
                   base: "max-w-full",
                   label:
                     "text-sm md:text-[14px] font-semibold mb-1 sm:mb-1.5 text-headingText",
-                  input: "h-10 sm:h-[46px] bg-labelField text-white",
-                  inputWrapper: "h-10 sm:h-[46px] bg-labelField rounded-[4px]",
+
+                  inputWrapper: "h-10 sm:h-[46px] bg-input rounded-[4px]",
                 }}
                 isRequired
               />

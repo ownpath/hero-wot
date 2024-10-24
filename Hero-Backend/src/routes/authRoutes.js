@@ -43,7 +43,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/login",
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=An account already exists with this email. Please login with email instead.`,
     session: false,
   }),
   (req, res) => {

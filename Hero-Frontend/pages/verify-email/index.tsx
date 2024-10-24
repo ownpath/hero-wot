@@ -139,7 +139,7 @@ const VerifyEmail = () => {
                       onChange={(e) => handleChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onPaste={handlePaste}
-                      className="w-[32px] h-10 sm:w-[38px] sm:h-14 text-center text-lg sm:text-2xl bg-labelField border-2 border-[#323337] rounded focus:border-blue-500 focus:outline-none"
+                      className="w-[32px] h-10 sm:w-[38px] sm:h-14 text-center text-lg sm:text-2xl bg-input rounded-[4px]"
                     />
                     {index === 2 && (
                       <span className="text-lg sm:text-2xl self-center">-</span>

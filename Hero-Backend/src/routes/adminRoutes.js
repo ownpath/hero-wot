@@ -32,7 +32,7 @@ router.put(
 
       // since we are not using refresh tokens user has to re-login to get a new access token with updated jwt with admin role
       // // Generate new tokens with updated role
-      // const { accessToken, refreshToken } = generateTokens(updatedUser);
+      const { accessToken, refreshToken } = generateTokens(updatedUser);
 
       // // If you're storing refresh tokens in the database, update it
       // await UserService.updateUser(updatedUser.id, { refreshToken });

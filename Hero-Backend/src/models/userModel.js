@@ -36,7 +36,13 @@ const UserModel = sequelize.define(
       defaultValue: "user",
     },
     user_type: {
-      type: DataTypes.ENUM("family", "friends", "work colleagues"),
+      type: DataTypes.ENUM(
+        "family",
+        "friends",
+        "team hero",
+        "business partners",
+        "proud hero owner"
+      ),
       allowNull: true,
       defaultValue: null,
     },

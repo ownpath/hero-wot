@@ -389,7 +389,7 @@ export default function BirthdayGreetingsForm() {
 
           <CardBody className="p-0 mt-4 sm:mt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="w-full h-[372px] bg-[#323337] rounded-[4px] p-3 sm:p-4 md:p-6">
+              <div className="w-full h-[372px] bg-input rounded-[4px] p-3 sm:p-4 md:p-6">
                 <div className="h-full flex flex-col justify-between">
                   <Textarea
                     placeholder="Write your message here.."
@@ -399,9 +399,10 @@ export default function BirthdayGreetingsForm() {
                     minRows={8}
                     classNames={{
                       base: "max-w-full flex-grow",
-                      input: "bg-transparent text-white resize-none h-full",
-                      innerWrapper: "bg-transparent h-full",
-                      inputWrapper: "border-none h-full",
+                      input:
+                        "bg-transparent text-white resize-none h-full shadow-none caret-buttonText",
+                      innerWrapper: "bg-transparent h-full shadow-none",
+                      inputWrapper: "border-none h-full shadow-none",
                     }}
                   />
                   <div className="w-full h-[1px] bg-[#FFFFFF33] my-1" />

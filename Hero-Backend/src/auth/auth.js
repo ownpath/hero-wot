@@ -46,6 +46,20 @@ passport.use(
           profile.emails && profile.emails.length > 0
             ? profile.emails[0].value
             : "";
+
+        // First check if a user exists with this email
+        const existingUserByEmail = await UserService.getUserByEmail(email);
+
+        if (existingUserByEmail && !existingUserByEmail.google_id) {
+          // User exists but hasn't linked their Google account
+          return done(null, false, {
+            message:
+              "An account already exists with this email. Please log in with your email and password.",
+            existingEmail: email,
+            errorCode: "EMAIL_EXISTS",
+          });
+        }
+
         let user = await UserService.getUserByGoogleId(profile.id);
         let isNewUser = false;
 

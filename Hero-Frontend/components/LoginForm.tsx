@@ -6,10 +6,6 @@ import { GoogleIcon } from "./icons";
 import { useRouter } from "next/router";
 import axios, { AxiosError } from "axios";
 
-export const description =
-  "A sign-up form with first name, last name, email, password, and confirm password fields. There's an option to switch to login mode and login with Google.";
-
-// API configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const api = axios.create({
@@ -19,42 +15,7 @@ const api = axios.create({
   },
 });
 
-// API functions
-const loginUser = async (email: string, password: string) => {
-  try {
-    const response = await api.post("/auth/login", { email, password });
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Login failed");
-  }
-};
-
-const registerUser = async (userData: {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-}) => {
-  try {
-    const response = await api.post("/auth/register", userData);
-    // The backend will handle the redirect, so we don't need to process the response here
-    // We'll return true to indicate that the request was sent successfully
-    return true;
-  } catch (error: any) {
-    // If there's a network error or the server responds with an error status
-    console.error("Registration error:", error);
-    if (error.response && error.response.data && error.response.data.error) {
-      throw new Error(error.response.data.error);
-    } else {
-      throw new Error("An error occurred during registration");
-    }
-  }
-};
-
 export default function LoginForm() {
-  const [isSignup, setIsSignup] = useState(true);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -122,12 +83,14 @@ export default function LoginForm() {
                 type="email"
                 value={email}
                 onValueChange={setEmail}
+                isInvalid={isEmailInvalid}
+                errorMessage="Please enter a valid email"
                 classNames={{
-                  base: "max-w-full bg-red-100",
+                  base: "max-w-full",
                   label:
                     "text-sm md:text-[14px] font-medium mb-0.5 sm:mb-1 text-white",
-                  input: "h-10 sm:h-[46px] text-headingText text-white",
-                  inputWrapper: "h-10 sm:h-[48px] bg-labelField rounded-[4px]",
+
+                  inputWrapper: "h-10 sm:h-[48px] bg-input rounded-[4px]",
                 }}
                 isRequired
               />
