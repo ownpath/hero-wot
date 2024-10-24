@@ -16,9 +16,9 @@ const sendConfirmationEmail = async (email, userId) => {
   const otp = generateOTP();
 
   const messageData = {
-    from: `Wheels of Time <noreply@${process.env.MAILGUN_SENDING_DOMAIN}>`,
+    from: `PawanMunjal.live<noreply@${process.env.MAILGUN_SENDING_DOMAIN}>`,
     to: email,
-    subject: "Confirm Your Wheels of Time Email",
+    subject: "Your Login OTP for #OurHeroAt70 🎉",
     html: `
       <h1>Welcome to Wheels of Time!</h1>
       <p>Your email verification code is: <strong>${otp}</strong></p>
