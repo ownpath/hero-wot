@@ -10,19 +10,24 @@ import { ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 
 function getRemainingTime() {
-  // Create Date objects
+  // Create current date in IST
   const now = new Date();
+  // Add IST offset (UTC+5:30)
+  const ISTOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
 
-  // Convert target date to UTC (Oct 28, 18:30 UTC = Oct 29, 00:00 IST)
-  const targetDate = new Date(Date.UTC(2024, 9, 28, 18, 30, 0));
+  // Create target date (Oct 29, 2024 00:00 IST)
+  const targetDate = new Date(2024, 9, 29);
+  // Adjust for IST
+  targetDate.setTime(targetDate.getTime() + ISTOffset);
 
+  // Reset both dates to midnight IST
+  now.setHours(0, 0, 0, 0);
+  targetDate.setHours(0, 0, 0, 0);
+
+  // Calculate the difference in days
   const difference = targetDate.getTime() - now.getTime();
-
-  // Return 0 if passed the target date
-  if (difference < 0) return 0;
-
-  // Calculate days remaining
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+
   return days;
 }
 
