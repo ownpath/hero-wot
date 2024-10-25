@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "pawanmunjal.life",
+  name: "pawanmunjal.life.test",
   description:
     "As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.",
   title: "Share your heartfelt wishes for #OurHeroAt70",

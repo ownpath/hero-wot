@@ -29,7 +29,7 @@ export const Head = () => {
       />
       <meta
         property="og:image"
-        content="https://opengraph.b-cdn.net/production/images/f93181af-e52a-418a-98a8-c465a447bd3e.png?token=Qj39UaBJ9FBdAFeYhbIWL4PLU_oCIWOf5IScUDLxJ6k&height=672&width=1200&expires=33265858769"
+        content="https://www.pawanmunjal.life/metapic.png"
       />
 
       <meta name="twitter:card" content="summary_large_image" />
@@ -44,10 +44,7 @@ export const Head = () => {
         content="As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.
 "
       />
-      <meta
-        name="twitter:image"
-        content="https://opengraph.b-cdn.net/production/images/f93181af-e52a-418a-98a8-c465a447bd3e.png?token=Qj39UaBJ9FBdAFeYhbIWL4PLU_oCIWOf5IScUDLxJ6k&height=672&width=1200&expires=33265858769"
-      ></meta>
+      <meta name="twitter:image" content="metapic"></meta>
 
       <link href="/favicon.ico" rel="icon" />
     </NextHead>
