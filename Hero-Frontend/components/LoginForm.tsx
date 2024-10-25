@@ -61,11 +61,11 @@ export default function LoginForm() {
       >
         <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
           <h1 className="font-ztNeueRalewe italic text-2xl text-headingText sm:text-[32px] md:text-[32px] font-bold leading-tight sm:leading-[38px] text-center mb-2 sm:mb-3">
-            Welcome!
+            Welcome
           </h1>
           <p className="w-full text-headingText sm:max-w-[453px] text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
-            Share your thoughts, wishes, or stories. You can write a message,
-            upload a photo, or even add a video to make it more personal.
+            Log in to share your personal message, photo, or video <br /> and
+            help us create a wall of memories!
           </p>
         </CardHeader>
 

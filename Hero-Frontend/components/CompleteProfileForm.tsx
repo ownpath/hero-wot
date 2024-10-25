@@ -128,8 +128,8 @@ export default function CompleteProfileForm({
             Tell Us More About Yourself
           </h1>
           <p className="w-full sm:max-w-[453px] text-headingText text-sm md:text-[14px] leading-normal sm:leading-[21px] text-[#FFFFFFB2] text-center">
-            Share your thoughts, wishes, or stories. You can write a message,
-            upload a photo, or even add a video to make it more personal.
+            We’d love to know a bit more about you! Your details will help us
+            personalize the experience.
           </p>
         </CardHeader>
 
