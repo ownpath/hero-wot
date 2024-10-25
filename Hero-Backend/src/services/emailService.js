@@ -16,14 +16,22 @@ const sendConfirmationEmail = async (email, userId) => {
   const otp = generateOTP();
 
   const messageData = {
-    from: `PawanMunjal.live<noreply@${process.env.MAILGUN_SENDING_DOMAIN}>`,
+    from: `Our Hero At 70<noreply@${process.env.MAILGUN_SENDING_DOMAIN}>`,
     to: email,
     subject: "Your Login OTP for #OurHeroAt70 🎉",
     html: `
-      <h1>Welcome to Wheels of Time!</h1>
-      <p>Your email verification code is: <strong>${otp}</strong></p>
-      <p>This code will expire in 15 minutes.</p>
-    `,
+<div class="container">
+    <h1>Your Login OTP for #OurHeroAt70 🎉</h1>
+    <p>
+      Thank you for joining us in celebrating this special milestone of Dr.
+      Pawan Munjal's 70th birthday! 🎂
+    </p>
+    <p>Here's your login OTP: <strong>${otp}</strong></p>
+    <p>Use it to access the site and be part of this story.</p>
+    <div class="footer">
+      <p>#OurHeroAt70</p>
+    </div>
+  </div> `,
   };
 
   try {

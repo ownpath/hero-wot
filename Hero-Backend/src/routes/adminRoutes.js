@@ -58,4 +58,43 @@ router.put(
   }
 );
 
+router.get(
+  "/verify-admin",
+  passport.authenticate("jwt", { session: false }),
+  roleMiddleware("admin"), // Your middleware will check req.user.role === "admin"
+  async (req, res) => {
+    try {
+      // If we get here, both the JWT is valid and the user is an admin
+      res.status(200).json({
+        isAdmin: true,
+        user: {
+          id: req.user.id,
+          email: req.user.email,
+          role: req.user.role,
+          first_name: req.user.first_name,
+          last_name: req.user.last_name,
+        },
+      });
+    } catch (error) {
+      console.error("Admin verification error:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        isAdmin: false,
+      });
+    }
+  }
+);
+
+router.get(
+  "/debug-token",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // Return the decoded user information from the JWT
+    res.json({
+      user: req.user,
+      message: "Current user details from JWT",
+    });
+  }
+);
+
 module.exports = router;

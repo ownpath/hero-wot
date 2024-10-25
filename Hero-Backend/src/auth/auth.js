@@ -12,16 +12,23 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Helper function to generate tokens
 const generateTokens = (user) => {
-  const accessToken = jwt.sign(
-    { userId: user.id, role: user.role },
-    JWT_SECRET,
-    { expiresIn: "3d" }
-  );
-  const refreshToken = jwt.sign(
-    { userId: user.id, role: user.role },
-    JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  // Make sure we explicitly include the role in the token payload
+  const tokenPayload = {
+    userId: user.id,
+    email: user.email,
+    role: user.role, // Ensure this is included
+  };
+
+  console.log("Generating token with payload:", tokenPayload); // Debug log
+
+  const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+    expiresIn: "3d",
+  });
+
+  const refreshToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
   return { accessToken, refreshToken };
 };
 // Helper function to split name
