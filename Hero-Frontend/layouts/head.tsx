@@ -11,29 +11,33 @@ export const Head = () => {
     <NextHead>
       <title>Share your heartfelt wishes for #OurHeroAt70</title>
       <meta
+        property="og:title"
+        content="Share your heartfelt wishes for #OurHeroAt70"
+        key="title"
+      />
+
+      <meta
         name="description"
         content="As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.
 "
+        key="description"
       />
 
-      <meta property="og:url" content="https://www.pawanmunjal.life/" />
-      <meta property="og:type" content="website" />
       <meta
-        property="og:title"
-        content="Share your heartfelt wishes for #OurHeroAt70"
+        property="og:url"
+        content="https://www.pawanmunjal.life/"
+        key="url"
       />
-      <meta
-        property="og:description"
-        content="As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.
-"
-      />
+      <meta property="og:type" content="website" key="type" />
+
       <meta
         property="og:image"
         content="https://www.pawanmunjal.life/metapic.png"
+        key="image"
       />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta property="twitter:domain" content="pawanmunjal.life" />
+      <meta property="twitter:domain" content="https://www.pawanmunjal.life" />
       <meta property="twitter:url" content="https://www.pawanmunjal.life/" />
       <meta
         name="twitter:title"
@@ -44,7 +48,7 @@ export const Head = () => {
         content="As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.
 "
       />
-      <meta name="twitter:image" content="metapic"></meta>
+      <meta name="twitter:image" content="/metapic"></meta>
 
       <link href="/favicon.ico" rel="icon" />
     </NextHead>
