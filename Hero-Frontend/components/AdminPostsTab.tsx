@@ -12,14 +12,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@nextui-org/react";
-import axios from "axios";
 import {
   useInfiniteQuery,
   useMutation,
@@ -210,7 +203,7 @@ const AdminManagementTabs: React.FC = () => {
   );
 
   const lastUserRef = useCallback(
-    (user: HTMLTableRowElement | null) => {
+    (user: HTMLDivElement | null) => {
       if (usersQuery.isFetchingNextPage) return;
 
       if (intObserver.current) intObserver.current.disconnect();
@@ -301,51 +294,42 @@ const AdminManagementTabs: React.FC = () => {
     );
   };
 
-  const renderUsersTable = () => {
+  const renderUserCards = () => {
     const users = usersQuery.data?.pages.flatMap((page) => page.users) || [];
 
     return (
-      <>
-        <Table aria-label="Users table">
-          <TableHeader>
-            <TableColumn>NAME</TableColumn>
-            <TableColumn>EMAIL</TableColumn>
-            <TableColumn>ROLE</TableColumn>
-            <TableColumn>ACTIONS</TableColumn>
-          </TableHeader>
-          <TableBody>
-            {users.map((user, index) => (
-              <div
-                key={user.id}
-                ref={index === users.length - 1 ? lastUserRef : undefined}
-              >
-                <TableRow>
-                  <TableCell>
-                    {user.first_name} {user.last_name}
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>
-                    {user.role !== "admin" && (
-                      <Button
-                        size="sm"
-                        color="primary"
-                        isLoading={promoteToAdminMutation.isPending}
-                        onPress={() => promoteToAdminMutation.mutate(user.id)}
-                      >
-                        Make Admin
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
+      <div className="grid grid-cols-1 gap-4 mt-4">
+        {users.map((user, index) => (
+          <Card
+            key={user.id}
+            className="w-full bg-hourglass"
+            ref={index === users.length - 1 ? lastUserRef : undefined}
+          >
+            <CardHeader className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {user.first_name} {user.last_name}
+                </h3>
+                <p className="text-small text-default-500">{user.email}</p>
+                <p className="text-tiny text-default-400">Role: {user.role}</p>
               </div>
-            ))}
-          </TableBody>
-        </Table>
-        {usersQuery.isFetchingNextPage && (
-          <div className="flex justify-center my-4">Loading more...</div>
-        )}
-      </>
+              <div>
+                {user.role !== "admin" && (
+                  <Button
+                    size="sm"
+                    color="primary"
+                    isLoading={promoteToAdminMutation.isPending}
+                    onPress={() => promoteToAdminMutation.mutate(user.id)}
+                  >
+                    Make Admin
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
+        {usersQuery.isFetchingNextPage && <div>Loading more...</div>}
+      </div>
     );
   };
 
@@ -390,19 +374,7 @@ const AdminManagementTabs: React.FC = () => {
               </Tabs>
             </Tab>
             <Tab key="users" title="Users">
-              <div className="mt-4">
-                {renderUsersTable()}
-                {usersQuery.hasNextPage && (
-                  <div className="flex justify-center mt-4">
-                    <Button
-                      isLoading={usersQuery.isFetchingNextPage}
-                      onPress={() => usersQuery.fetchNextPage()}
-                    >
-                      Load More
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <div className="mt-4">{renderUserCards()}</div>
             </Tab>
           </Tabs>
         </CardBody>
