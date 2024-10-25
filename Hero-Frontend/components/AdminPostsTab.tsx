@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
+  Divider,
 } from "@nextui-org/react";
 import {
   useInfiniteQuery,
@@ -22,6 +23,11 @@ import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const SUPPORTED_MEDIA_TYPES = {
+  image: [".jpg", ".jpeg", ".png", ".gif", ".webp", ".tiff", ".bmp"],
+  video: [".mp4", ".mov", ".avi", ".wmv", ".webm", ".3gp", ".mkv"],
+} as const;
 
 interface Post {
   id: number;
@@ -37,6 +43,7 @@ interface Post {
     last_name: string;
   };
   updated_at: string;
+  media: Array<string>;
 }
 
 interface User {
@@ -58,6 +65,65 @@ interface UsersApiResponse {
   totalCount: number;
   nextOffset: number | null;
 }
+
+const getMediaType = (url: string): "image" | "video" => {
+  const lowerUrl = url.toLowerCase();
+
+  if (SUPPORTED_MEDIA_TYPES.video.some((ext) => lowerUrl.endsWith(ext))) {
+    return "video";
+  }
+  if (SUPPORTED_MEDIA_TYPES.image.some((ext) => lowerUrl.endsWith(ext))) {
+    return "image";
+  }
+
+  return "image";
+};
+
+const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
+  if (!media || media.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-4 mt-4">
+      {media.map((url) => {
+        const mediaType = getMediaType(url);
+
+        return (
+          <div key={url} className="relative">
+            {mediaType === "image" ? (
+              <img
+                src={url}
+                alt="Post media"
+                className="w-full h-48 object-cover rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = "/placeholder-image.png";
+                }}
+              />
+            ) : (
+              <video
+                controls
+                className="w-full h-48 object-cover rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLVideoElement;
+                  target.onerror = null;
+                  const container = target.parentElement;
+                  if (container) {
+                    container.innerHTML =
+                      '<div class="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg">Video unavailable</div>';
+                  }
+                }}
+              >
+                <source src={url} type={`video/${url.split(".").pop()}`} />
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const fetchPosts = async ({
   pageParam = 0,
@@ -407,6 +473,14 @@ const AdminManagementTabs: React.FC = () => {
                   </p>
                 )}
                 <p className="mt-4">{selectedPost?.body}</p>
+
+                {selectedPost?.media && selectedPost.media.length > 0 && (
+                  <>
+                    <Divider className="my-4" />
+                    <p className="font-semibold mb-2">Attached Media:</p>
+                    <MediaDisplay media={selectedPost.media} />
+                  </>
+                )}
               </ModalBody>
               <ModalFooter>
                 {selectedPost?.status === "processing" && (
