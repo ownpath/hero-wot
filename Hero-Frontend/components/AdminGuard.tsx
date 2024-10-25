@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import authenticatedRequest from "../config/authenticatedRequest";
+import { Spinner } from "@nextui-org/react";
 
 interface AdminGuardProps {
   children: React.ReactNode;
@@ -72,7 +73,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div>Loading...</div>
+        <Spinner color="default" size="lg" />
       </div>
     );
   }

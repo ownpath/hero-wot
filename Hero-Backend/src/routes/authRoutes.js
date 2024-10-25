@@ -129,7 +129,63 @@ router.post("/verify-email", async (req, res) => {
   }
 });
 
-// Refresh token route
+router.get(
+  "/check-profile-completion",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await UserService.getUserById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({
+          error: "User not found",
+          requiresAuth: true,
+        });
+      }
+
+      const isProfileIncomplete =
+        !user.first_name || !user.last_name || !user.user_type;
+
+      if (isProfileIncomplete) {
+        return res.status(403).json({
+          error: "Profile incomplete",
+          requiresProfileCompletion: true,
+          missingFields: {
+            firstName: !user.first_name,
+            lastName: !user.last_name,
+            userType: !user.user_type,
+          },
+          // Include existing user data if available
+          userData: {
+            firstName: user.first_name || "",
+            lastName: user.last_name || "",
+          },
+        });
+      }
+
+      // If profile is complete, return success
+      return res.status(200).json({
+        success: true,
+        message: "Profile is complete",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          userType: user.user_type,
+          role: user.role,
+        },
+      });
+    } catch (error) {
+      console.error("Profile check error:", error);
+      return res.status(500).json({
+        error: "Failed to check profile completion status",
+        message: error.message,
+      });
+    }
+  }
+);
+
 router.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {

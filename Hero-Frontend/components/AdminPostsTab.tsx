@@ -225,7 +225,7 @@ const AdminManagementTabs: React.FC = () => {
         {posts.map((post, index) => (
           <Card
             key={post.id}
-            className="w-full cursor-pointer hover:bg-gray-800"
+            className="w-full cursor-pointer bg-hourglass"
             isPressable
             onPress={() => handleCardClick(post)}
             ref={
@@ -286,7 +286,6 @@ const AdminManagementTabs: React.FC = () => {
 
   const renderUsersTable = () => {
     const users = usersQuery.data?.pages.flatMap((page) => page.users) || [];
-
 
     return (
       <Table aria-label="Users table">

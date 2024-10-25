@@ -15,8 +15,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CompleteProfileFormProps {
   onComplete: (success: boolean) => void;
+  firstNameProp?: string;
+  lastNameProp?: string;
 }
-
 const recognitionOptions = [
   { value: "family", label: "Family" },
   { value: "friends", label: "Friends" },
@@ -27,9 +28,11 @@ const recognitionOptions = [
 
 export default function CompleteProfileForm({
   onComplete,
+  firstNameProp = "",
+  lastNameProp = "",
 }: CompleteProfileFormProps) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState(firstNameProp);
+  const [lastName, setLastName] = useState(lastNameProp);
   const [recognition, setRecognition] = useState("");
   const [designation, setDesignation] = useState("");
   const [isLoading, setIsLoading] = useState(false);

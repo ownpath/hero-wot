@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Toaster, toast } from "sonner";
+import { Spinner } from "@nextui-org/react";
 
 const AuthCallback = () => {
   const router = useRouter();
@@ -15,7 +16,6 @@ const AuthCallback = () => {
         try {
           const dataString = Array.isArray(data) ? data[0] : data;
           const decodedData = JSON.parse(decodeURIComponent(dataString));
-
 
           if (decodedData.error) {
             console.error("Authentication error:", decodedData.error);
@@ -94,16 +94,8 @@ const AuthCallback = () => {
 
   return (
     <>
-      <Toaster position="top-center" expand={true} richColors />
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="p-8 bg-white shadow-md rounded-lg">
-          <h2 className="text-2xl font-bold mb-4 text-center">
-            Processing Authentication
-          </h2>
-          <p className="text-gray-600">
-            Please wait while we complete the authentication process...
-          </p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Spinner color="default" size="lg" />
       </div>
     </>
   );
