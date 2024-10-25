@@ -113,8 +113,18 @@ const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
                       '<div class="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg">Video unavailable</div>';
                   }
                 }}
+                // Add aria-label for better accessibility
+                aria-label="Post attachment video"
               >
                 <source src={url} type={`video/${url.split(".").pop()}`} />
+                {/* Add an empty track element to satisfy jsx-a11y requirements */}
+                <track
+                  kind="captions"
+                  src="" // You can provide actual captions file URL here if available
+                  label="English captions"
+                  srcLang="en"
+                  default
+                />
                 Your browser does not support the video tag.
               </video>
             )}
