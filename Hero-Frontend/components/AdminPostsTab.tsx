@@ -43,7 +43,10 @@ interface Post {
     last_name: string;
   };
   updated_at: string;
-  media: Array<string>;
+  media: Array<{
+    url: string;
+    type: string;
+  }>;
 }
 
 interface User {
@@ -66,13 +69,13 @@ interface UsersApiResponse {
   nextOffset: number | null;
 }
 
-const getMediaType = (url: string): "image" | "video" => {
-  const lowerUrl = url.toLowerCase();
+const getMediaType = (mediaItem: Post["media"][0]): "image" | "video" => {
+  const url = mediaItem.url.toLowerCase();
 
-  if (SUPPORTED_MEDIA_TYPES.video.some((ext) => lowerUrl.endsWith(ext))) {
+  if (SUPPORTED_MEDIA_TYPES.video.some((ext) => url.endsWith(ext))) {
     return "video";
   }
-  if (SUPPORTED_MEDIA_TYPES.image.some((ext) => lowerUrl.endsWith(ext))) {
+  if (SUPPORTED_MEDIA_TYPES.image.some((ext) => url.endsWith(ext))) {
     return "image";
   }
 
@@ -84,15 +87,15 @@ const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
 
   return (
     <div className="grid grid-cols-2 gap-4 mt-4">
-      {media.map((url) => {
-        const mediaType = getMediaType(url);
+      {media.map((mediaItem) => {
+        const mediaType = getMediaType(mediaItem);
 
         return (
-          <div key={url} className="relative">
+          <div key={mediaItem.url} className="relative">
             {mediaType === "image" ? (
               <img
-                src={url}
-                alt="Post media"
+                src={mediaItem.url}
+                alt="Post media content"
                 className="w-full h-48 object-cover rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -113,14 +116,15 @@ const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
                       '<div class="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg">Video unavailable</div>';
                   }
                 }}
-                // Add aria-label for better accessibility
                 aria-label="Post attachment video"
               >
-                <source src={url} type={`video/${url.split(".").pop()}`} />
-                {/* Add an empty track element to satisfy jsx-a11y requirements */}
+                <source
+                  src={mediaItem.url}
+                  type={`video/${mediaItem.url.split(".").pop()}`}
+                />
                 <track
                   kind="captions"
-                  src="" // You can provide actual captions file URL here if available
+                  src=""
                   label="English captions"
                   srcLang="en"
                   default
