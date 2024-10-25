@@ -96,7 +96,7 @@ const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
               <img
                 src={mediaItem.url}
                 alt="Post media content"
-                className="w-full h-48 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.onerror = null;
@@ -106,7 +106,7 @@ const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
             ) : (
               <video
                 controls
-                className="w-full h-48 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
                   const target = e.target as HTMLVideoElement;
                   target.onerror = null;
