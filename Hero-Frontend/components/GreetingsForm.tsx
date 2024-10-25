@@ -37,6 +37,34 @@ interface FileInfo {
   previewUrl: string;
 }
 
+// Utility function to convert MOV file to MP4
+const convertMovToMp4File = (file: FileWithPath): FileWithPath => {
+  if (file.name.toLowerCase().endsWith(".mov")) {
+    // Create a new file name with .mp4 extension
+    const newFileName = file.name.replace(/\.mov$/i, ".mp4");
+
+    // Create a new blob from the file
+    const blob = new Blob([file], { type: "video/mp4" });
+
+    // Use Object.create to set up the prototype chain
+    const newFile = Object.create(file, {
+      name: { value: newFileName, writable: true },
+      type: { value: "video/mp4", writable: true },
+      lastModified: { value: file.lastModified, writable: true },
+    });
+
+    // Copy over the path property in a type-safe way
+    Object.defineProperty(newFile, "path", {
+      value: file.path ? file.path.replace(/\.mov$/i, ".mp4") : newFileName,
+      writable: false,
+      enumerable: true,
+    });
+
+    return newFile as FileWithPath;
+  }
+  return file;
+};
+
 export default function BirthdayGreetingsForm() {
   const [greetings, setGreetings] = useState("");
   const [files, setFiles] = useState<FileInfo[]>([]);
@@ -142,14 +170,20 @@ export default function BirthdayGreetingsForm() {
       return true;
     });
 
-    const newFiles = validFiles.map((file) => {
-      const detectedType = detectFileType(file);
-      const previewUrl = URL.createObjectURL(file);
-      setPreviewUrls((prev) => ({ ...prev, [file.name]: previewUrl }));
+    const newFiles = validFiles.map((file: FileWithPath) => {
+      // Convert MOV to MP4 if necessary
+      const processedFile = convertMovToMp4File(file);
+      const detectedType = detectFileType(processedFile);
+
+      // Create a blob from the processed file
+      const blob = new Blob([processedFile], { type: processedFile.type });
+      const previewUrl = URL.createObjectURL(blob);
+
+      setPreviewUrls((prev) => ({ ...prev, [processedFile.name]: previewUrl }));
       return {
-        file,
-        name: file.name,
-        path: file.path || file.name,
+        file: processedFile,
+        name: processedFile.name,
+        path: processedFile.path || processedFile.name,
         fileType: detectedType!,
         uploadProgress: 0,
         uploadStatus: "pending",
