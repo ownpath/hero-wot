@@ -400,7 +400,7 @@ export default function BirthdayGreetingsForm() {
                     classNames={{
                       base: "max-w-full flex-grow",
                       input:
-                        "bg-transparent text-white resize-none h-full shadow-none caret-buttonText",
+                        "bg-transparent text-headingText resize-none h-full shadow-none caret-buttonText",
                       innerWrapper: "bg-transparent h-full shadow-none",
                       inputWrapper: "border-none h-full shadow-none",
                     }}

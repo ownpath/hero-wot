@@ -43,17 +43,16 @@ export default function DefaultLayout({
         <div className="flex justify-between items-center">
           <div>
             <Link href="/">
-              <MainLogo className="mt-0.5 w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-hourglass " />
+              <MainLogo className="mt-2 w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-hourglass " />
             </Link>
           </div>
-          {isLoggedIn && (
-            <button
-              onClick={handleLogout}
-              className="text-hourglass hover:underline transition-all duration-200"
-            >
-              Logout
-            </button>
-          )}
+
+          <button
+            onClick={handleLogout}
+            className="text-hourglass hover:underline transition-all duration-200"
+          >
+            Logout
+          </button>
         </div>
       </div>
       <main className="container mx-auto max-w-7xl px-6 flex-grow">
