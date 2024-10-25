@@ -209,6 +209,23 @@ const AdminManagementTabs: React.FC = () => {
     [processingQuery, acceptedQuery, rejectedQuery]
   );
 
+  const lastUserRef = useCallback(
+    (user: HTMLTableRowElement | null) => {
+      if (usersQuery.isFetchingNextPage) return;
+
+      if (intObserver.current) intObserver.current.disconnect();
+
+      intObserver.current = new IntersectionObserver((users) => {
+        if (users[0].isIntersecting && usersQuery.hasNextPage) {
+          usersQuery.fetchNextPage();
+        }
+      });
+
+      if (user) intObserver.current.observe(user);
+    },
+    [usersQuery]
+  );
+
   // Render functions
   const renderPostCards = (status: Post["status"]) => {
     const query =
@@ -288,37 +305,47 @@ const AdminManagementTabs: React.FC = () => {
     const users = usersQuery.data?.pages.flatMap((page) => page.users) || [];
 
     return (
-      <Table aria-label="Users table">
-        <TableHeader>
-          <TableColumn>NAME</TableColumn>
-          <TableColumn>EMAIL</TableColumn>
-          <TableColumn>ROLE</TableColumn>
-          <TableColumn>ACTIONS</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>
-                {user.first_name} {user.last_name}
-              </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.role}</TableCell>
-              <TableCell>
-                {user.role !== "admin" && (
-                  <Button
-                    size="sm"
-                    color="primary"
-                    isLoading={promoteToAdminMutation.isPending}
-                    onPress={() => promoteToAdminMutation.mutate(user.id)}
-                  >
-                    Make Admin
-                  </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <>
+        <Table aria-label="Users table">
+          <TableHeader>
+            <TableColumn>NAME</TableColumn>
+            <TableColumn>EMAIL</TableColumn>
+            <TableColumn>ROLE</TableColumn>
+            <TableColumn>ACTIONS</TableColumn>
+          </TableHeader>
+          <TableBody>
+            {users.map((user, index) => (
+              <div
+                key={user.id}
+                ref={index === users.length - 1 ? lastUserRef : undefined}
+              >
+                <TableRow>
+                  <TableCell>
+                    {user.first_name} {user.last_name}
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    {user.role !== "admin" && (
+                      <Button
+                        size="sm"
+                        color="primary"
+                        isLoading={promoteToAdminMutation.isPending}
+                        onPress={() => promoteToAdminMutation.mutate(user.id)}
+                      >
+                        Make Admin
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              </div>
+            ))}
+          </TableBody>
+        </Table>
+        {usersQuery.isFetchingNextPage && (
+          <div className="flex justify-center my-4">Loading more...</div>
+        )}
+      </>
     );
   };
 
