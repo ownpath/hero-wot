@@ -1,8 +1,11 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "PawanMunjal.live",
-  description: "Happy Birthday Legend!",
+  name: "pawanmunjal.life",
+  description:
+    "As we approach our chairman’s 70th birthday, we invite you to share your love, cherished memories, and heartfelt wishes.",
+  title: "Share your heartfelt wishes for #OurHeroAt70",
+
   navItems: [
     {
       label: "Home",
