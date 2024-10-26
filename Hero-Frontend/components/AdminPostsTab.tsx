@@ -13,6 +13,7 @@ import {
   ModalFooter,
   useDisclosure,
   Divider,
+  Slider,
 } from "@nextui-org/react";
 import {
   useInfiniteQuery,
@@ -21,6 +22,8 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
+
+import { Image, Play } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,6 +37,7 @@ interface Post {
   title: string;
   body: string;
   status: "processing" | "accepted" | "rejected";
+  score?: number;
   author?: {
     first_name: string;
     last_name: string;
@@ -80,6 +84,22 @@ const getMediaType = (mediaItem: Post["media"][0]): "image" | "video" => {
   }
 
   return "image";
+};
+
+const hasMediaTypes = (media: Post["media"]) => {
+  const hasImages = media.some((item) =>
+    SUPPORTED_MEDIA_TYPES.image.some((ext) =>
+      item.url.toLowerCase().endsWith(ext)
+    )
+  );
+
+  const hasVideos = media.some((item) =>
+    SUPPORTED_MEDIA_TYPES.video.some((ext) =>
+      item.url.toLowerCase().endsWith(ext)
+    )
+  );
+
+  return { hasImages, hasVideos };
 };
 
 const MediaDisplay: React.FC<{ media: Post["media"] }> = ({ media }) => {
@@ -227,21 +247,27 @@ const AdminManagementTabs: React.FC = () => {
     },
   });
 
-  const promoteToAdminMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const updateScoreMutation = useMutation({
+    mutationFn: async ({
+      postId,
+      score,
+    }: {
+      postId: number;
+      score: number;
+    }) => {
       const response = await authenticatedRequest({
         method: "PUT",
-        url: "/admin/promote-to-admin",
-        data: { id },
+        url: `/posts/${postId}`,
+        data: { score },
       });
       return response.data;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success(data.message);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Score updated successfully");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to promote user to admin");
+      toast.error(error.message || "Failed to update score");
     },
   });
 
@@ -315,7 +341,7 @@ const AdminManagementTabs: React.FC = () => {
         {posts.map((post, index) => (
           <Card
             key={post.id}
-            className="w-full cursor-pointer bg-hourglass"
+            className="w-full cursor-pointer bg-white"
             isPressable
             onPress={() => handleCardClick(post)}
             ref={
@@ -326,12 +352,38 @@ const AdminManagementTabs: React.FC = () => {
           >
             <CardHeader className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-semibold">{post.title}</h3>
-                <p className="text-small text-default-500">
+                <p className="text-small text-black">
                   {post.author?.first_name} {post.author?.last_name}
                 </p>
-                <p className="text-tiny text-default-400">
+                <p className="text-tiny text-black-400">
                   Updated: {new Date(post.updated_at).toLocaleString()}
+                </p>
+                {post.media && post.media.length > 0 && (
+                  <div className="flex gap-1">
+                    {(() => {
+                      const { hasImages, hasVideos } = hasMediaTypes(
+                        post.media
+                      );
+                      return (
+                        <>
+                          {hasImages && (
+                            <Image className="w-12 h-12 text-black-400" />
+                          )}
+                          {hasVideos && (
+                            <Play className="w-12 h-12 text-black-400" />
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+                <p className="text-small text-black-500">
+                  Score:{" "}
+                  {post.score === null || post.score === undefined ? (
+                    <span className="text-black-400">Not scored</span>
+                  ) : (
+                    <span className="text-primary">{post.score}</span>
+                  )}
                 </p>
               </div>
               <div className="flex space-x-2">
@@ -390,21 +442,12 @@ const AdminManagementTabs: React.FC = () => {
                 <h3 className="text-lg font-semibold">
                   {user.first_name} {user.last_name}
                 </h3>
-                <p className="text-small text-default-500">{user.email}</p>
-                <p className="text-tiny text-default-400">Role: {user.role}</p>
+                <p className="text-small text-black-500">USERID:{user.id}</p>
+
+                <p className="text-small text-black-500">{user.email}</p>
+                <p className="text-tiny text-black-400">Role: {user.role}</p>
               </div>
-              <div>
-                {user.role !== "admin" && (
-                  <Button
-                    size="sm"
-                    color="primary"
-                    isLoading={promoteToAdminMutation.isPending}
-                    onPress={() => promoteToAdminMutation.mutate(user.id)}
-                  >
-                    Make Admin
-                  </Button>
-                )}
-              </div>
+              <div></div>
             </CardHeader>
           </Card>
         ))}
@@ -460,7 +503,12 @@ const AdminManagementTabs: React.FC = () => {
         </CardBody>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="2xl"
+        scrollBehavior="inside"
+      >
         <ModalContent>
           {(onClose) => (
             <>
@@ -495,6 +543,59 @@ const AdminManagementTabs: React.FC = () => {
                     <MediaDisplay media={selectedPost.media} />
                   </>
                 )}
+
+                <Divider className="my-4" />
+                <div className="flex flex-col gap-2">
+                  <p className="font-semibold">
+                    Current Score:{" "}
+                    {selectedPost?.score === null ||
+                    selectedPost?.score === undefined ? (
+                      <span className="text-black-400">No score set</span>
+                    ) : (
+                      <span className="text-primary">{selectedPost.score}</span>
+                    )}
+                  </p>
+
+                  <p className="font-semibold">Update Score</p>
+                  <div className="flex items-center gap-4">
+                    <Slider
+                      label="Score"
+                      size="lg"
+                      step={1}
+                      maxValue={100}
+                      minValue={1}
+                      defaultValue={selectedPost?.score || 50}
+                      className="max-w-md"
+                      color="primary"
+                      showSteps={true}
+                      marks={[
+                        {
+                          value: 1,
+                          label: "1",
+                        },
+                        {
+                          value: 50,
+                          label: "50",
+                        },
+                        {
+                          value: 100,
+                          label: "100",
+                        },
+                      ]}
+                      onChangeEnd={(value: any) => {
+                        if (selectedPost?.id) {
+                          updateScoreMutation.mutate({
+                            postId: selectedPost.id,
+                            score: value,
+                          });
+                        }
+                      }}
+                    />
+                    <span className="text-small">
+                      {selectedPost?.score || 50}
+                    </span>
+                  </div>
+                </div>
               </ModalBody>
               <ModalFooter>
                 {selectedPost?.status === "processing" && (
