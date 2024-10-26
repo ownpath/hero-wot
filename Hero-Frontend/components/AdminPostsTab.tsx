@@ -13,9 +13,6 @@ import {
   ModalFooter,
   useDisclosure,
   Divider,
-  Select,
-  SelectItem,
-  Input,
 } from "@nextui-org/react";
 import {
   useInfiniteQuery,
@@ -24,7 +21,6 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
-import { ImageIcon, Video, Filter, X } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -71,12 +67,6 @@ interface UsersApiResponse {
   users: User[];
   totalCount: number;
   nextOffset: number | null;
-}
-
-interface PostFilters {
-  hasMedia: boolean | null;
-  dateRange: "today" | "week" | "month" | "all";
-  authorName: string;
 }
 
 const getMediaType = (mediaItem: Post["media"][0]): "image" | "video" => {
@@ -215,50 +205,6 @@ const AdminManagementTabs: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const queryClient = useQueryClient();
   const intObserver = useRef<IntersectionObserver | null>(null);
-  const [filters, setFilters] = useState<PostFilters>({
-    hasMedia: null,
-    dateRange: "all",
-    authorName: "",
-  });
-
-  const applyFilters = (posts: Post[]) => {
-    return posts.filter((post) => {
-      // Media filter
-      if (filters.hasMedia !== null) {
-        const hasMedia = post.media && post.media.length > 0;
-        if (hasMedia !== filters.hasMedia) return false;
-      }
-
-      // Date range filter
-      if (filters.dateRange !== "all") {
-        const postDate = new Date(post.updated_at);
-        const today = new Date();
-        switch (filters.dateRange) {
-          case "today":
-            if (postDate.toDateString() !== today.toDateString()) return false;
-            break;
-          case "week":
-            const weekAgo = new Date(today.setDate(today.getDate() - 7));
-            if (postDate < weekAgo) return false;
-            break;
-          case "month":
-            const monthAgo = new Date(today.setMonth(today.getMonth() - 1));
-            if (postDate < monthAgo) return false;
-            break;
-        }
-      }
-
-      // Author name filter
-      if (filters.authorName) {
-        const authorFullName =
-          `${post.author?.first_name} ${post.author?.last_name}`.toLowerCase();
-        if (!authorFullName.includes(filters.authorName.toLowerCase()))
-          return false;
-      }
-
-      return true;
-    });
-  };
 
   // Post queries
   const processingQuery = usePostQuery("processing");
@@ -463,104 +409,6 @@ const AdminManagementTabs: React.FC = () => {
           </Card>
         ))}
         {usersQuery.isFetchingNextPage && <div>Loading more...</div>}
-      </div>
-    );
-  };
-
-  const FilterBar: React.FC = () => {
-    return (
-      <div className="flex flex-wrap gap-4 mb-4 p-4 bg-default-100 rounded-lg">
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant={filters.hasMedia === true ? "solid" : "bordered"}
-            color={filters.hasMedia === true ? "primary" : "default"}
-            onPress={() =>
-              setFilters((prev) => ({
-                ...prev,
-                hasMedia: prev.hasMedia === true ? null : true,
-              }))
-            }
-          >
-            <ImageIcon size={16} />
-            Has Media
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Select
-            size="sm"
-            placeholder="Date Range"
-            selectedKeys={[filters.dateRange]}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                dateRange: e.target.value as PostFilters["dateRange"],
-              }))
-            }
-          >
-            <SelectItem key="all" value="all">
-              All Time
-            </SelectItem>
-            <SelectItem key="today" value="today">
-              Today
-            </SelectItem>
-            <SelectItem key="week" value="week">
-              Past Week
-            </SelectItem>
-            <SelectItem key="month" value="month">
-              Past Month
-            </SelectItem>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Input
-            size="sm"
-            placeholder="Filter by author"
-            value={filters.authorName}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                authorName: e.target.value,
-              }))
-            }
-            startContent={<Filter size={16} />}
-            endContent={
-              filters.authorName && (
-                <Button
-                  size="sm"
-                  isIconOnly
-                  variant="light"
-                  onPress={() =>
-                    setFilters((prev) => ({ ...prev, authorName: "" }))
-                  }
-                >
-                  <X size={14} />
-                </Button>
-              )
-            }
-          />
-        </div>
-
-        {(filters.hasMedia !== null ||
-          filters.dateRange !== "all" ||
-          filters.authorName) && (
-          <Button
-            size="sm"
-            variant="light"
-            color="danger"
-            onPress={() =>
-              setFilters({
-                hasMedia: null,
-                dateRange: "all",
-                authorName: "",
-              })
-            }
-          >
-            Clear Filters
-          </Button>
-        )}
       </div>
     );
   };
