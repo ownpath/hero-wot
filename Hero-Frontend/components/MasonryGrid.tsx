@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
 import Image from "next/image";
 import { PlayCircle } from "lucide-react";
+import { Skeleton } from "@nextui-org/skeleton";
 
 interface Post {
   id: number;
@@ -94,6 +95,9 @@ interface MediaDisplayProps {
 
 const MediaDisplay = React.memo(
   ({ media, isModal = false }: MediaDisplayProps) => {
+    const [imageLoading, setImageLoading] = useState(true);
+    const [videoLoading, setVideoLoading] = useState(true);
+
     if (!media || media.length === 0) return null;
 
     if (!isModal) {
@@ -104,15 +108,22 @@ const MediaDisplay = React.memo(
             const mediaType = getMediaType(mediaItem);
             if (index === 0) {
               return mediaType === "image" ? (
-                <Image
-                  key={mediaItem.url}
-                  src={mediaItem.url}
-                  alt="Post content"
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
+                <div key={mediaItem.url} className="relative w-full h-full">
+                  <Skeleton
+                    isLoaded={!imageLoading}
+                    className="w-full h-full rounded-none"
+                  >
+                    <Image
+                      src={mediaItem.url}
+                      alt="Post content"
+                      fill
+                      priority
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      onLoadingComplete={() => setImageLoading(false)}
+                    />
+                  </Skeleton>
+                </div>
               ) : (
                 <div key={mediaItem.url} className="relative w-full h-full">
                   <video
@@ -122,6 +133,7 @@ const MediaDisplay = React.memo(
                     autoPlay
                     className="w-full h-full object-cover"
                     aria-label="Video preview"
+                    onLoadedData={() => setVideoLoading(false)}
                   >
                     <source
                       src={mediaItem.url}
@@ -129,6 +141,7 @@ const MediaDisplay = React.memo(
                     />
                     <track kind="captions" />
                   </video>
+
                   <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center"></div>
                 </div>
               );
@@ -148,22 +161,39 @@ const MediaDisplay = React.memo(
             <div key={mediaItem.url} className="relative w-full">
               {mediaType === "image" ? (
                 <div className="relative aspect-[4/3]">
-                  <Image
-                    src={mediaItem.url}
-                    alt="Post media content"
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                  />
+                  <Skeleton
+                    isLoaded={!imageLoading}
+                    className="w-full h-full rounded-lg"
+                  >
+                    <Image
+                      src={mediaItem.url}
+                      alt="Post media content"
+                      fill
+                      className="object-cover"
+                      sizes="100vw"
+                      onLoadingComplete={() => setImageLoading(false)}
+                    />
+                  </Skeleton>
                 </div>
               ) : (
-                <video controls autoPlay className="w-full">
-                  <source
-                    src={mediaItem.url}
-                    type={`video/${mediaItem.url.split(".").pop()}`}
-                  />
-                  <track kind="captions" />
-                </video>
+                <Skeleton
+                  isLoaded={!videoLoading}
+                  className="w-full rounded-lg"
+                >
+                  <video
+                    controls
+                    autoPlay
+                    className="w-full"
+                    onLoadedData={() => setVideoLoading(false)}
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    <source
+                      src={mediaItem.url}
+                      type={`video/${mediaItem.url.split(".").pop()}`}
+                    />
+                    <track kind="captions" />
+                  </video>
+                </Skeleton>
               )}
             </div>
           );
@@ -244,17 +274,16 @@ const masonryStyles = `
 const PostsMasonryLayout: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const queryClient = useQueryClient();
   const loadingTriggerRef = useRef<HTMLDivElement>(null);
 
   const postsQuery = useInfiniteQuery({
-    queryKey: ["accepted-posts"], // Changed key to be more specific
+    queryKey: ["accepted-posts"],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await authenticatedRequest({
         method: "GET",
         url: "/posts/accepted",
         params: {
-          limit: 10,
+          limit: 100,
           offset: pageParam,
         },
       });
@@ -272,37 +301,30 @@ const PostsMasonryLayout: React.FC = () => {
     [onOpen]
   );
 
-  const createIntersectionObserver = useCallback(() => {
-    if (!loadingTriggerRef.current) return;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          postsQuery.hasNextPage &&
+          !postsQuery.isFetchingNextPage
+        ) {
+          postsQuery.fetchNextPage();
+        }
+      },
+      { rootMargin: "100px" }
+    );
 
-    const options = {
-      root: null,
-      rootMargin: "150% 0px 0px 0px",
-      threshold: 0,
-    };
+    if (loadingTriggerRef.current) {
+      observer.observe(loadingTriggerRef.current);
+    }
 
-    const observer = new IntersectionObserver((entries) => {
-      if (
-        entries[0].isIntersecting &&
-        postsQuery.hasNextPage &&
-        !postsQuery.isFetchingNextPage
-      ) {
-        postsQuery.fetchNextPage();
-      }
-    }, options);
-
-    observer.observe(loadingTriggerRef.current);
-    return observer;
+    return () => observer.disconnect();
   }, [
     postsQuery.hasNextPage,
     postsQuery.isFetchingNextPage,
     postsQuery.fetchNextPage,
   ]);
-
-  useEffect(() => {
-    const observer = createIntersectionObserver();
-    return () => observer?.disconnect();
-  }, [createIntersectionObserver]);
 
   if (postsQuery.isLoading) return <div>Loading...</div>;
   if (postsQuery.isError) return <div>Error fetching posts</div>;
@@ -314,12 +336,6 @@ const PostsMasonryLayout: React.FC = () => {
       <style>{masonryStyles}</style>
 
       <div className="p-4 relative">
-        <div
-          ref={loadingTriggerRef}
-          className="absolute left-0 w-full h-1 pointer-events-none"
-          style={{ top: "33vh" }}
-        />
-
         <Masonry
           breakpointCols={breakpointColumns}
           className="my-masonry-grid"
@@ -334,6 +350,11 @@ const PostsMasonryLayout: React.FC = () => {
           ))}
         </Masonry>
       </div>
+      <div
+        ref={loadingTriggerRef}
+        className="absolute left-0 w-full h-1 pointer-events-none"
+        style={{ top: "33vh" }}
+      />
 
       <Modal
         isOpen={isOpen}

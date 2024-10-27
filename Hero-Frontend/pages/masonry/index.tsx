@@ -10,7 +10,7 @@ export default function AdminPanelPage() {
   return (
     <AdminGuard>
       <div className="mt-8">
-        <div className="mb-8">
+        <div className="mb-8 sticky top-8 z-10">
           <Navbar />
         </div>
         <PostsMasonryLayout />

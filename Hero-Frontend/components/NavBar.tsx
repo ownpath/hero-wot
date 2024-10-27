@@ -22,6 +22,7 @@ import { useTheme } from "next-themes";
 import clsx from "clsx";
 
 import { Hourglass, PenSquare, LogIn, Palette } from "lucide-react";
+import MainLogo from "./MainLogo";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -128,10 +129,11 @@ export const Navbar = () => {
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Hourglass />
-            <p className="font-bold text-inherit">Wheels of Time</p>
-          </NextLink>
+          <div>
+            <Link href="/">
+              <MainLogo className="mt-2 w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-hourglass " />
+            </Link>
+          </div>
         </NavbarBrand>
       </NavbarContent>
 
