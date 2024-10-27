@@ -213,7 +213,7 @@ const PostCard: React.FC<PostCardProps> = React.memo(
       <Card
         isPressable
         onPress={() => handleCardClick(post)}
-        className=" w-[360px] mb-4 bg-white overflow-hidden rounded-[4px]"
+        className=" w-[340px] mb-4 bg-masonryCardColor overflow-hidden rounded-[4px]"
       >
         <CardBody className="p-0">
           {post.media && post.media.length > 0 && (
@@ -223,17 +223,17 @@ const PostCard: React.FC<PostCardProps> = React.memo(
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-ztNeueRalewe italic text-2xl font-bold text-default-700 mb-2">
+                <h3 className="font-ztNeueRalewe italic text-2xl font-bold text-masonryCardText mb-2">
                   {post.author?.first_name} {post.author?.last_name}
                 </h3>
-                <p className="text-xs text-default-500 mb-8">
+                <p className="text-xs  mb-8">
                   {post.author?.designation
                     ? `${post.author.user_type}/${post.author.designation}`
                     : post.author?.user_type}
                 </p>
               </div>
             </div>
-            <p className="text-sm text-default-600">{post.body}</p>
+            <p className="text-sm text-masonryCardText">{post.body}</p>
           </div>
         </CardBody>
       </Card>
@@ -368,7 +368,7 @@ const PostsMasonryLayout: React.FC = () => {
             <>
               <ModalHeader className="flex flex-col gap-1"></ModalHeader>
               <ModalBody>
-                <p className="font-ztNeueRalewe italic text-2xl font-bold text-default-700 mb-2">
+                <p className="font-ztNeueRalewe italic text-2xl font-bold text-default-700 mb-2 p-4">
                   {selectedPost?.author?.first_name}{" "}
                   {selectedPost?.author?.last_name}
                 </p>
@@ -386,7 +386,10 @@ const PostsMasonryLayout: React.FC = () => {
                 <p className="mt-4">{selectedPost?.body}</p>
               </ModalBody>
               <ModalFooter>
-                <Button color="default" onPress={onClose}>
+                <Button
+                  className="text-masonryButtonText bg-masonryButtonBg"
+                  onPress={onClose}
+                >
                   Close
                 </Button>
               </ModalFooter>

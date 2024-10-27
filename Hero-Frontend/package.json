@@ -32,6 +32,7 @@
 		"clsx": "2.1.1",
 		"framer-motion": "~11.1.1",
 		"intl-messageformat": "^10.5.0",
+		"lottie-web": "^5.12.2",
 		"lucide-react": "^0.453.0",
 		"masonry-layout": "^4.2.2",
 		"matter-js": "^0.20.0",
