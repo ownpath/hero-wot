@@ -4,6 +4,9 @@ const nextConfig = {
   env: {
     customKey: "my-value",
   },
+  images: {
+    domains: ["storage.googleapis.com"],
+  },
 };
 
 module.exports = nextConfig;

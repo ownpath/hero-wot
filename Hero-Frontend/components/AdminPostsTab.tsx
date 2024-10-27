@@ -41,6 +41,7 @@ interface Post {
   author?: {
     first_name: string;
     last_name: string;
+    user_type: string;
   };
   approver?: {
     first_name: string;
@@ -352,52 +353,52 @@ const AdminManagementTabs: React.FC = () => {
           >
             <CardHeader className="flex justify-between items-center">
               <div>
-                <p className="text-small text-black">
+                <p className="text-lg text-black font-semibold">
                   {post.author?.first_name} {post.author?.last_name}
                 </p>
-                <p className="text-tiny text-black-400">
-                  Updated: {new Date(post.updated_at).toLocaleString()}
+                <p className="text-md text-black font-semibold">
+                  Relation : {post.author?.user_type}
                 </p>
-                {post.media && post.media.length > 0 && (
-                  <div className="flex gap-1">
-                    {(() => {
-                      const { hasImages, hasVideos } = hasMediaTypes(
-                        post.media
-                      );
-                      return (
-                        <>
-                          {hasImages && (
-                            <Image className="w-12 h-12 text-black-400" />
-                          )}
-                          {hasVideos && (
-                            <Play className="w-12 h-12 text-black-400" />
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-                )}
-                <p className="text-small text-black-500">
+
+                <p className="text-md text-black font-semibold">
                   Score:{" "}
                   {post.score === null || post.score === undefined ? (
-                    <span className="text-black-400">Not scored</span>
+                    <span className="text-black">Not scored</span>
                   ) : (
-                    <span className="text-primary">{post.score}</span>
+                    <span className="text-black">{post.score}</span>
                   )}
                 </p>
+                <p className="text-md text-black">
+                  Updated: {new Date(post.updated_at).toLocaleString()}
+                </p>
               </div>
+              {post.media && post.media.length > 0 && (
+                <div className="flex gap-1">
+                  {(() => {
+                    const { hasImages, hasVideos } = hasMediaTypes(post.media);
+                    return (
+                      <>
+                        {hasImages && (
+                          <Image className="w-12 h-12 text-black" />
+                        )}
+                        {hasVideos && <Play className="w-12 h-12 text-black" />}
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
               <div className="flex space-x-2">
                 {status === "processing" && (
                   <>
                     <Button
-                      size="sm"
+                      size="md"
                       color="success"
                       onPress={() => handleStatusChange(post.id, "accepted")}
                     >
                       Accept
                     </Button>
                     <Button
-                      size="sm"
+                      size="md"
                       color="danger"
                       onPress={() => handleStatusChange(post.id, "rejected")}
                     >
@@ -417,7 +418,7 @@ const AdminManagementTabs: React.FC = () => {
               </div>
             </CardHeader>
             <CardBody>
-              <p>{post.body}</p>
+              <p className="text-black">{post.body}</p>
             </CardBody>
           </Card>
         ))}
@@ -442,10 +443,10 @@ const AdminManagementTabs: React.FC = () => {
                 <h3 className="text-lg font-semibold">
                   {user.first_name} {user.last_name}
                 </h3>
-                <p className="text-small text-black-500">USERID:{user.id}</p>
+                <p className="text-small text-black">USERID:{user.id}</p>
 
-                <p className="text-small text-black-500">{user.email}</p>
-                <p className="text-tiny text-black-400">Role: {user.role}</p>
+                <p className="text-small text-black">{user.email}</p>
+                <p className="text-tiny text-black">Role: {user.role}</p>
               </div>
               <div></div>
             </CardHeader>
