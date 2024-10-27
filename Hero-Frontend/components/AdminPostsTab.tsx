@@ -39,6 +39,7 @@ interface Post {
   status: "processing" | "accepted" | "rejected";
   score?: number;
   author?: {
+    id: number;
     first_name: string;
     last_name: string;
     email: string;
@@ -373,7 +374,9 @@ const AdminManagementTabs: React.FC = () => {
                   post.author?.designation === "" ? (
                     <span className="text-black">N/A</span>
                   ) : (
-                    <span className="text-black">{post.score}</span>
+                    <span className="text-black">
+                      {post.author?.designation}
+                    </span>
                   )}
                 </p>
 
@@ -388,6 +391,8 @@ const AdminManagementTabs: React.FC = () => {
                 <p className="text-md text-black">
                   Updated: {new Date(post.updated_at).toLocaleString()}
                 </p>
+                <p className="text-black text-xs">User id: {post.author?.id}</p>
+                <p className="text-black text-xs">Post id: {post.id}</p>
               </div>
               {post.media && post.media.length > 0 && (
                 <div className="flex gap-1">
@@ -526,6 +531,7 @@ const AdminManagementTabs: React.FC = () => {
         onClose={onClose}
         size="2xl"
         scrollBehavior="inside"
+        className="bg-white text-black"
       >
         <ModalContent>
           {(onClose) => (
@@ -534,6 +540,12 @@ const AdminManagementTabs: React.FC = () => {
                 {selectedPost?.title}
               </ModalHeader>
               <ModalBody>
+                <p className="text-black text-xs">
+                  User id: {selectedPost?.author?.id}
+                </p>
+                <p className="text-black text-xs">
+                  Post id: {selectedPost?.id}
+                </p>
                 <p>
                   <strong>Name:</strong> {selectedPost?.author?.first_name}{" "}
                   {selectedPost?.author?.last_name}
