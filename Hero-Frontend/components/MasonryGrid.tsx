@@ -338,8 +338,9 @@ const PostsMasonryLayout: React.FC = () => {
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        size="full"
+        size="3xl"
         scrollBehavior="inside"
+        backdrop="blur"
       >
         <ModalContent>
           {(onClose) => (
