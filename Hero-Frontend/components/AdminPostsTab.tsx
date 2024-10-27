@@ -502,9 +502,9 @@ const AdminManagementTabs: React.FC = () => {
         <CardBody>
           <Tabs
             aria-label="Admin management tabs"
-            color="primary"
+            color="default"
             variant="solid"
-            className="mb-4"
+            className="mb-4 bg-black text-headingText"
           >
             <Tab key="posts" title="Posts">
               <Tabs>
@@ -519,9 +519,9 @@ const AdminManagementTabs: React.FC = () => {
                 </Tab>
               </Tabs>
             </Tab>
-            <Tab key="users" title="Users">
+            {/* <Tab key="users" title="Users">
               <div className="mt-4">{renderUserCards()}</div>
-            </Tab>
+            </Tab> */}
           </Tabs>
         </CardBody>
       </Card>
