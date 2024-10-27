@@ -41,7 +41,9 @@ interface Post {
   author?: {
     first_name: string;
     last_name: string;
+    email: string;
     user_type: string;
+    designation: string;
   };
   approver?: {
     first_name: string;
@@ -356,8 +358,23 @@ const AdminManagementTabs: React.FC = () => {
                 <p className="text-lg text-black font-semibold">
                   {post.author?.first_name} {post.author?.last_name}
                 </p>
+                <p className="text-lg text-black font-semibold">
+                  {post.author?.email}
+                </p>
                 <p className="text-md text-black font-semibold">
                   Relation : {post.author?.user_type}
+                </p>
+                {}
+
+                <p className="text-md text-black font-semibold">
+                  Designation:{" "}
+                  {post.author?.designation === null ||
+                  post.author?.designation === undefined ||
+                  post.author?.designation === "" ? (
+                    <span className="text-black">N/A</span>
+                  ) : (
+                    <span className="text-black">{post.score}</span>
+                  )}
                 </p>
 
                 <p className="text-md text-black font-semibold">
@@ -518,9 +535,24 @@ const AdminManagementTabs: React.FC = () => {
               </ModalHeader>
               <ModalBody>
                 <p>
-                  <strong>Author:</strong> {selectedPost?.author?.first_name}{" "}
+                  <strong>Name:</strong> {selectedPost?.author?.first_name}{" "}
                   {selectedPost?.author?.last_name}
                 </p>
+                <p>
+                  <strong>Email:</strong> {selectedPost?.author?.email}
+                </p>
+                <p>
+                  <strong>Relation:</strong> {selectedPost?.author?.user_type}
+                </p>
+                {selectedPost?.author?.designation !== null ||
+                  selectedPost?.author?.designation !== undefined ||
+                  (selectedPost?.author?.designation !== "" && (
+                    <p>
+                      <strong>Designation:</strong>{" "}
+                      {selectedPost.author.designation}
+                    </p>
+                  ))}
+
                 <p>
                   <strong>Status:</strong> {selectedPost?.status}
                 </p>
