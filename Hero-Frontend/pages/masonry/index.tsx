@@ -6,14 +6,14 @@ import DefaultLayout from "@/layouts/default";
 import { Navbar } from "../../components/NavBar";
 import { Toaster } from "sonner";
 
-export default function AdminPanelPage() {
+export default function Masonry() {
   return (
     <AdminGuard>
-      <div className="mt-8">
-        <div className="mb-8 sticky top-8 z-10">
-          <Navbar />
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="pt-32">
+          <PostsMasonryLayout />
         </div>
-        <PostsMasonryLayout />
       </div>
     </AdminGuard>
   );

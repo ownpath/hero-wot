@@ -6,7 +6,7 @@ import AdminGuard from "@/components/AdminGuard";
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-full w-full">
       <AdminGuard>
         <LottieScrollAnimation />
       </AdminGuard>

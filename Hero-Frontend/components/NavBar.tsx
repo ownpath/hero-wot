@@ -21,6 +21,8 @@ import MainLogo from "./MainLogo";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
@@ -59,6 +61,17 @@ export const Navbar = () => {
     setIsLoggedIn(!!accessToken);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      setIsVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollPos]);
+
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -72,60 +85,65 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="px-4 sm:px-8 py-4">
-      <NextUINavbar
-        maxWidth="full"
-        position="static"
-        className="bg-masonryNavbar rounded-md shadow-md"
-      >
-        <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-          <NavbarBrand as="li" className="gap-3 max-w-fit">
-            <div>
-              <Link href="/">
-                <MainLogo className="mt-2 w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-masonryButtonBg" />
-              </Link>
-            </div>
-          </NavbarBrand>
-        </NavbarContent>
-
-        <NavbarContent
-          className="hidden sm:flex sm:basis-full items-center"
-          justify="end"
+    <div
+      className={clsx(
+        "fixed top-0 left-0 right-0 z-50 transition-transform duration-300",
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      )}
+    >
+      <div className="px-7 sm:px-14 mt-10">
+        <NextUINavbar
+          maxWidth="full"
+          className="bg-masonryNavbar rounded-md shadow-md"
         >
-          <ul className="hidden lg:flex gap-4 justify-end ml-2 items-center">
-            <NavbarItem className="flex items-center">
-              <NextLink
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "text-masonryButtonBg hover:text-primary data-[active=true]:text-primary data-[active=true]:font-medium"
-                )}
-                href="/"
-              >
-                Journey
-              </NextLink>
-            </NavbarItem>
-            <NavbarItem className="flex items-center">
-              <NextLink
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "text-masonryButtonBg hover:text-primary data-[active=true]:text-primary data-[active=true]:font-medium"
-                )}
-                href="/masonry"
-              >
-                Wall of Wishes
-              </NextLink>
-            </NavbarItem>
-            <NavbarItem className="flex items-center">
-              <Button
-                as={Link}
-                href={isLoggedIn ? "/postgreeting" : "/login"}
-                variant="light"
-                className=" text-masonryButtonBg"
-              >
-                Send your wishes!
-              </Button>
-            </NavbarItem>
-            {/* <NavbarItem className="flex items-center">
+          <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+            <NavbarBrand as="li" className="gap-3 max-w-fit">
+              <div>
+                <Link href="/">
+                  <MainLogo className="mt-2 w-12 h-12 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-masonryButtonBg" />
+                </Link>
+              </div>
+            </NavbarBrand>
+          </NavbarContent>
+
+          <NavbarContent
+            className="hidden sm:flex sm:basis-full items-center"
+            justify="end"
+          >
+            <ul className="hidden lg:flex gap-4 justify-end ml-2 items-center">
+              <NavbarItem className="flex items-center">
+                <NextLink
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "text-masonryButtonBg hover:text-primary data-[active=true]:text-primary data-[active=true]:font-medium"
+                  )}
+                  href="/"
+                >
+                  Journey
+                </NextLink>
+              </NavbarItem>
+              <NavbarItem className="flex items-center">
+                <NextLink
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "text-masonryButtonBg hover:text-primary data-[active=true]:text-primary data-[active=true]:font-medium"
+                  )}
+                  href="/wallofwishes"
+                >
+                  Wall of Wishes
+                </NextLink>
+              </NavbarItem>
+              <NavbarItem className="flex items-center">
+                <Button
+                  as={Link}
+                  href={isLoggedIn ? "/postgreeting" : "/login"}
+                  variant="light"
+                  className=" text-masonryButtonBg"
+                >
+                  Send your wishes!
+                </Button>
+              </NavbarItem>
+              {/* <NavbarItem className="flex items-center">
               <Button
                 variant="light"
                 startContent={<Palette size={18} />}
@@ -133,47 +151,47 @@ export const Navbar = () => {
                 className="text-masonryButtonBg"
               ></Button>
             </NavbarItem> */}
-            {isLoggedIn && (
-              <NavbarItem className="flex items-center">
-                <Button
-                  variant="light"
-                  startContent={<LogOut size={18} />}
-                  onClick={handleLogout}
-                  className="text-masonryButtonBg"
+              {isLoggedIn && (
+                <NavbarItem className="flex items-center">
+                  <Button
+                    variant="light"
+                    startContent={<LogOut size={18} />}
+                    onClick={handleLogout}
+                    className="text-masonryButtonBg"
+                  >
+                    Logout
+                  </Button>
+                </NavbarItem>
+              )}
+            </ul>
+          </NavbarContent>
+
+          <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+            <NavbarMenuToggle />
+          </NavbarContent>
+
+          <NavbarMenu>
+            <div className="mx-4 mt-2 flex flex-col gap-2">
+              <NavbarMenuItem>
+                <Link color="foreground" href="/" size="lg">
+                  Journey
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link color="foreground" href="/masonry" size="lg">
+                  Wall of Wishes
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link
+                  color="foreground"
+                  href={isLoggedIn ? "/postgreeting" : "/login"}
+                  size="lg"
                 >
-                  Logout
-                </Button>
-              </NavbarItem>
-            )}
-          </ul>
-        </NavbarContent>
-
-        <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-          <NavbarMenuToggle />
-        </NavbarContent>
-
-        <NavbarMenu>
-          <div className="mx-4 mt-2 flex flex-col gap-2">
-            <NavbarMenuItem>
-              <Link color="foreground" href="/" size="lg">
-                Journey
-              </Link>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <Link color="foreground" href="/masonry" size="lg">
-                Wall of Wishes
-              </Link>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <Link
-                color="foreground"
-                href={isLoggedIn ? "/postgreeting" : "/login"}
-                size="lg"
-              >
-                Send your wishes!
-              </Link>
-            </NavbarMenuItem>
-            {/* <NavbarMenuItem>
+                  Send your wishes!
+                </Link>
+              </NavbarMenuItem>
+              {/* <NavbarMenuItem>
               <Button
                 variant="light"
                 startContent={<Palette size={18} />}
@@ -183,21 +201,22 @@ export const Navbar = () => {
                 Theme
               </Button>
             </NavbarMenuItem> */}
-            {isLoggedIn && (
-              <NavbarMenuItem>
-                <Button
-                  variant="light"
-                  startContent={<LogOut size={18} />}
-                  onClick={handleLogout}
-                  className="w-full bg-masonryButtonBg text-masonryButtonText"
-                >
-                  Logout
-                </Button>
-              </NavbarMenuItem>
-            )}
-          </div>
-        </NavbarMenu>
-      </NextUINavbar>
+              {isLoggedIn && (
+                <NavbarMenuItem>
+                  <Button
+                    variant="light"
+                    startContent={<LogOut size={18} />}
+                    onClick={handleLogout}
+                    className="w-full bg-masonryButtonBg text-masonryButtonText"
+                  >
+                    Logout
+                  </Button>
+                </NavbarMenuItem>
+              )}
+            </div>
+          </NavbarMenu>
+        </NextUINavbar>
+      </div>
     </div>
   );
 };

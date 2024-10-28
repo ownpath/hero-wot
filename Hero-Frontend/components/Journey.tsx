@@ -1,28 +1,21 @@
 import React, { useRef, useEffect, useState } from "react";
 import lottie from "lottie-web";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
 
-// Simple debounce function implementation
-const debounce = (func: any, wait: any) => {
-  let timeout: any;
-  return function executedFunction(...args: any[]) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
+interface AnimationInstance {
+  totalFrames: number;
+  goToAndStop: (frame: number, isFrame: boolean) => void;
+  destroy: () => void;
+}
 
-const LottieScrollAnimation = () => {
+const LottieScrollAnimation: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lottieContainerRef = useRef<HTMLDivElement>(null);
-  const [animation, setAnimation] = useState<any>(null);
+  const [animation, setAnimation] = useState<AnimationInstance | null>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["center center", "end end"],
+    offset: ["start start", "end start"],
   });
 
   useEffect(() => {
@@ -35,68 +28,47 @@ const LottieScrollAnimation = () => {
       loop: false,
       autoplay: false,
       path: "/danceHover7.json",
-    });
+    }) as AnimationInstance;
 
     setAnimation(anim);
 
     const handleScroll = () => {
       if (anim) {
-        const frame = Math.round(
-          scrollYProgress.get() * (anim.totalFrames - 1)
-        );
+        const progress = scrollYProgress.get();
+        const frame = Math.round(progress * (anim.totalFrames - 1));
         anim.goToAndStop(frame, true);
       }
     };
 
-    // Optimized resize handler
-    const handleResize = debounce(() => {
-      // Force recalculation of scroll values
+    const handleResize = () => {
       window.dispatchEvent(new Event("resize"));
-    }, 250);
+    };
 
     window.addEventListener("resize", handleResize);
-
-    // Subscribe to scrollYProgress changes
     const unsubscribe = scrollYProgress.on("change", handleScroll);
 
     return () => {
-      if (anim) {
-        anim.destroy();
-      }
+      anim?.destroy();
       window.removeEventListener("resize", handleResize);
       unsubscribe();
     };
-  }, []);
+  }, [scrollYProgress]);
 
   return (
-    <div className="container" ref={containerRef}>
-      <motion.div className="animation-container" ref={lottieContainerRef} />
+    <div
+      ref={containerRef}
+      className="min-h-[1100vh] w-screen relative bg-[#1a1a1a]"
+    >
+      <div className="h-[50vh]" />
+      <motion.div
+        ref={lottieContainerRef}
+        className="fixed w-full h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+      />
     </div>
   );
 };
 
-// Styles
 const styles = `
-.container {
-  width: 100vw;
-  height: 14.28vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  overflow: hidden;
-  position: relative;
-}
-
-.animation-container {
-  position: fixed;
-  width: 100%;
-  height: auto;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
-
 .text-precomp {
   animation: float 3s ease-in-out infinite !important;
   display: inline-block !important;
@@ -155,21 +127,38 @@ const styles = `
   90% { background-position: -10% 10%; }
 }
 
+/* Noise overlay */
 body::before {
   content: "";
-  z-index: 9999;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  z-index: 50;
+  @apply fixed top-0 left-0 w-full h-full pointer-events-none opacity-50;
   background: url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp);
   background-repeat: repeat;
   background-size: auto;
   animation: noise 100ms infinite;
-  pointer-events: none;
-  opacity: 0.5;
   mix-blend-mode: multiply;
+}
+
+@media only screen and (min-width: 600px) {
+  .inside-the-mind-mobile,
+  .scroll-header,
+  .click-to-view,
+  .allhands-window,
+  .hello-desktop {
+    display: none !important;
+  }
+  
+  .balls-id path {
+    fill: aqua !important;
+    background-color: blue !important;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .inside-the-mind,
+  .hello-desktop {
+    display: none !important;
+  }
 }
 `;
 

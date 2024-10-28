@@ -12,6 +12,7 @@ import {
   useDisclosure,
   Divider,
   Slider,
+  Spinner,
 } from "@nextui-org/react";
 import {
   useInfiniteQuery,
@@ -21,7 +22,7 @@ import {
 import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
 import Image from "next/image";
-import { PlayCircle } from "lucide-react";
+import { CircleX, PlayCircle } from "lucide-react";
 import { Skeleton } from "@nextui-org/skeleton";
 
 interface Post {
@@ -93,22 +94,53 @@ interface MediaDisplayProps {
   cardView?: boolean;
 }
 
+const formatUserType = (userType: string): string => {
+  switch (userType?.toLowerCase()) {
+    case "friends":
+      return "Friends";
+    case "family":
+      return "Family";
+    case "business partners":
+      return "Business Partners";
+    case "team hero":
+      return "Team Hero";
+    default:
+      return userType;
+  }
+};
+
 const MediaDisplay = React.memo(
   ({ media, isModal = false }: MediaDisplayProps) => {
     const [imageLoading, setImageLoading] = useState(true);
     const [videoLoading, setVideoLoading] = useState(true);
+    const [imageDimensions, setImageDimensions] = useState<{
+      [key: string]: { width: number; height: number };
+    }>({});
 
     if (!media || media.length === 0) return null;
 
+    const getImageAspectRatio = (url: string) => {
+      return imageDimensions[url]?.height > imageDimensions[url]?.width
+        ? "vertical"
+        : "horizontal";
+    };
+
     if (!isModal) {
-      // Card View - Single media with 4:3 aspect ratio
+      // Card View - Keep videos at natural aspect ratio, images with adaptive ratio
       return (
-        <div className="w-full relative aspect-[4/3]">
+        <div className="w-full">
           {media.map((mediaItem, index) => {
             const mediaType = getMediaType(mediaItem);
             if (index === 0) {
               return mediaType === "image" ? (
-                <div key={mediaItem.url} className="relative w-full h-full">
+                <div
+                  key={mediaItem.url}
+                  className={`relative w-full ${
+                    getImageAspectRatio(mediaItem.url) === "vertical"
+                      ? "aspect-[3/4]"
+                      : "aspect-[4/3]"
+                  }`}
+                >
                   <Skeleton
                     isLoaded={!imageLoading}
                     className="w-full h-full rounded-none"
@@ -118,20 +150,29 @@ const MediaDisplay = React.memo(
                       alt="Post content"
                       fill
                       priority
-                      className="object-cover"
+                      className="object-contain"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      onLoadingComplete={() => setImageLoading(false)}
+                      onLoadingComplete={(result) => {
+                        setImageLoading(false);
+                        setImageDimensions((prev) => ({
+                          ...prev,
+                          [mediaItem.url]: {
+                            width: result.naturalWidth,
+                            height: result.naturalHeight,
+                          },
+                        }));
+                      }}
                     />
                   </Skeleton>
                 </div>
               ) : (
-                <div key={mediaItem.url} className="relative w-full h-full">
+                <div key={mediaItem.url} className="relative w-full">
                   <video
                     muted
                     loop
                     playsInline
                     autoPlay
-                    className="w-full h-full object-cover"
+                    className="w-full"
                     aria-label="Video preview"
                     onLoadedData={() => setVideoLoading(false)}
                   >
@@ -141,8 +182,6 @@ const MediaDisplay = React.memo(
                     />
                     <track kind="captions" />
                   </video>
-
-                  <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center"></div>
                 </div>
               );
             }
@@ -152,7 +191,7 @@ const MediaDisplay = React.memo(
       );
     }
 
-    // Modal View - Full size media
+    // Modal View - Consistent with card view styling
     return (
       <div className="space-y-4 w-full">
         {media.map((mediaItem) => {
@@ -160,7 +199,13 @@ const MediaDisplay = React.memo(
           return (
             <div key={mediaItem.url} className="relative w-full">
               {mediaType === "image" ? (
-                <div className="relative aspect-[4/3]">
+                <div
+                  className={`relative w-full ${
+                    getImageAspectRatio(mediaItem.url) === "vertical"
+                      ? "aspect-[3/4]"
+                      : "aspect-[4/3]"
+                  }`}
+                >
                   <Skeleton
                     isLoaded={!imageLoading}
                     className="w-full h-full rounded-lg"
@@ -169,31 +214,42 @@ const MediaDisplay = React.memo(
                       src={mediaItem.url}
                       alt="Post media content"
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       sizes="100vw"
-                      onLoadingComplete={() => setImageLoading(false)}
+                      onLoadingComplete={(result) => {
+                        setImageLoading(false);
+                        setImageDimensions((prev) => ({
+                          ...prev,
+                          [mediaItem.url]: {
+                            width: result.naturalWidth,
+                            height: result.naturalHeight,
+                          },
+                        }));
+                      }}
                     />
                   </Skeleton>
                 </div>
               ) : (
-                <Skeleton
-                  isLoaded={!videoLoading}
-                  className="w-full rounded-lg"
-                >
-                  <video
-                    controls
-                    autoPlay
-                    className="w-full"
-                    onLoadedData={() => setVideoLoading(false)}
-                    style={{ backgroundColor: "transparent" }}
+                <div className="relative w-full">
+                  <Skeleton
+                    isLoaded={!videoLoading}
+                    className="w-full rounded-lg"
                   >
-                    <source
-                      src={mediaItem.url}
-                      type={`video/${mediaItem.url.split(".").pop()}`}
-                    />
-                    <track kind="captions" />
-                  </video>
-                </Skeleton>
+                    <video
+                      controls
+                      autoPlay
+                      className="w-full"
+                      onLoadedData={() => setVideoLoading(false)}
+                      style={{ backgroundColor: "transparent" }}
+                    >
+                      <source
+                        src={mediaItem.url}
+                        type={`video/${mediaItem.url.split(".").pop()}`}
+                      />
+                      <track kind="captions" />
+                    </video>
+                  </Skeleton>
+                </div>
               )}
             </div>
           );
@@ -213,7 +269,7 @@ const PostCard: React.FC<PostCardProps> = React.memo(
       <Card
         isPressable
         onPress={() => handleCardClick(post)}
-        className=" w-[340px] mb-4 bg-masonryCardColor overflow-hidden rounded-[4px]"
+        className=" w-full mb-4 bg-masonryCardColor overflow-hidden rounded-[4px]"
       >
         <CardBody className="p-0">
           {post.media && post.media.length > 0 && (
@@ -228,8 +284,8 @@ const PostCard: React.FC<PostCardProps> = React.memo(
                 </h3>
                 <p className="text-xs  mb-8">
                   {post.author?.designation
-                    ? `${post.author.user_type}/${post.author.designation}`
-                    : post.author?.user_type}
+                    ? `${formatUserType(post.author?.user_type)}/${post.author.designation}`
+                    : formatUserType(post.author?.user_type as string)}
                 </p>
               </div>
             </div>
@@ -252,22 +308,25 @@ const breakpointColumns = {
 
 const masonryStyles = `
  .my-masonry-grid {
-  display: -webkit-box; /* Not needed if autoprefixing */
-  display: -ms-flexbox; /* Not needed if autoprefixing */
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  margin-left: -30px; /* gutter size offset */
+  margin-left: -15px; /* Internal gutter offset */
+  margin-right: -15px; /* Internal gutter offset */
   width: auto;
+  padding-left: 40px; /* Edge padding from Figma */
+  padding-right: 40px; /* Edge padding from Figma */
 }
+
 .my-masonry-grid_column {
-  padding-left: 30px; /* gutter size */
+  padding-left: 15px; /* Internal gutter */
+  padding-right: 15px; /* Internal gutter */
   background-clip: padding-box;
 }
 
-/* Style your items */
-.my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+.my-masonry-grid_column > button {
   margin-bottom: 24px;
-  margin-left: 24px;
-  margin-right: 24px
+  
 }
 `;
 
@@ -326,8 +385,26 @@ const PostsMasonryLayout: React.FC = () => {
     postsQuery.fetchNextPage,
   ]);
 
-  if (postsQuery.isLoading) return <div>Loading...</div>;
-  if (postsQuery.isError) return <div>Error fetching posts</div>;
+  // Loading state
+  if (postsQuery.isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <Spinner size="lg" color="default" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (postsQuery.isError) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center text-red-500">
+        <div className="flex flex-col items-center gap-2">
+          <CircleX className="w-32 h-32" />
+          <p>Error fetching posts</p>
+        </div>
+      </div>
+    );
+  }
 
   const posts = postsQuery.data?.pages.flatMap((page) => page.posts) || [];
 
@@ -363,14 +440,19 @@ const PostsMasonryLayout: React.FC = () => {
         scrollBehavior="inside"
         backdrop="blur"
       >
-        <ModalContent>
+        <ModalContent className="w-full">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1"></ModalHeader>
+              <ModalHeader className="flex flex-col"></ModalHeader>
               <ModalBody>
-                <p className="font-ztNeueRalewe italic text-2xl font-bold text-default-700 mb-2 p-4">
+                <p className="font-ztNeueRalewe italic text-5xl font-bold text-masonryCardText">
                   {selectedPost?.author?.first_name}{" "}
                   {selectedPost?.author?.last_name}
+                </p>
+                <p className="font-sans text-md font-bold text-masonryCardText mb-1">
+                  {selectedPost?.author?.designation
+                    ? `${formatUserType(selectedPost?.author.user_type)}/${formatUserType(selectedPost.author.designation)}`
+                    : formatUserType(selectedPost?.author?.user_type as string)}
                 </p>
                 {selectedPost?.media && selectedPost.media.length > 0 && (
                   <>
@@ -383,7 +465,7 @@ const PostsMasonryLayout: React.FC = () => {
                   </>
                 )}
 
-                <p className="mt-4">{selectedPost?.body}</p>
+                <p className="font-sans mt-4">{selectedPost?.body}</p>
               </ModalBody>
               <ModalFooter>
                 <Button
