@@ -104,7 +104,7 @@ const VerifyEmail = () => {
   return (
     <DefaultLayout>
       <div className="flex items-center justify-center min-h-screen">
-        <Toaster position="top-center" expand={true} richColors />
+        <Toaster position="bottom-right" expand={true} richColors />
         <Card className="w-full max-w-[573px] min-h-[280px] p-[44px] items-center justify-center bg-hourglass rounded-[4px] mx-auto ">
           <CardHeader className="flex flex-col items-center justify-center h-auto sm:h-[90px] pt-4 sm:pt-[44px] pb-3 px-0">
             <h1

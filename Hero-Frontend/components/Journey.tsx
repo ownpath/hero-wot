@@ -2,25 +2,99 @@ import React, { useRef, useEffect, useState } from "react";
 import lottie from "lottie-web";
 import { motion, useScroll } from "framer-motion";
 import { Progress } from "@nextui-org/progress";
+import { Button } from "@nextui-org/react";
+import { useRouter } from "next/router";
+
+const NoiseOverlay = () => (
+  <>
+    <div className="noise-overlay" />
+    <style jsx global>{`
+      .noise-overlay {
+        content: "";
+        z-index: 50;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.5;
+        background: url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp);
+        background-repeat: repeat;
+        background-size: auto;
+        animation: noise 100ms infinite;
+        mix-blend-mode: multiply;
+      }
+
+      @keyframes noise {
+        0%,
+        100% {
+          background-position: 0% 0%;
+        }
+        10% {
+          background-position: -5% -10%;
+        }
+        20% {
+          background-position: -15% 5%;
+        }
+        30% {
+          background-position: 7% -25%;
+        }
+        40% {
+          background-position: 20% 25%;
+        }
+        50% {
+          background-position: -25% 10%;
+        }
+        60% {
+          background-position: 15% 5%;
+        }
+        70% {
+          background-position: 0% 15%;
+        }
+        80% {
+          background-position: 25% 35%;
+        }
+        90% {
+          background-position: -10% 10%;
+        }
+      }
+    `}</style>
+  </>
+);
 
 interface AnimationInstance {
-  addEventListener(arg0: string, arg1: () => void): unknown;
+  addEventListener: any;
   totalFrames: number;
   goToAndStop: (frame: number, isFrame: boolean) => void;
   destroy: () => void;
 }
 
 const LottieScrollAnimation: React.FC = () => {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const [animation, setAnimation] = useState<AnimationInstance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showFinalContent, setShowFinalContent] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"],
   });
+
+  useEffect(() => {
+    const unsubscribeScroll = scrollYProgress.on("change", (latest) => {
+      if (latest > 0.95) {
+        setShowFinalContent(true);
+      } else {
+        setShowFinalContent(false);
+      }
+    });
+
+    return () => unsubscribeScroll();
+  }, [scrollYProgress]);
 
   useEffect(() => {
     const container = lottieContainerRef.current;
@@ -34,34 +108,16 @@ const LottieScrollAnimation: React.FC = () => {
       path: "/danceHover7.json",
     }) as AnimationInstance;
 
-    // Add loading handlers
     anim.addEventListener("data_ready", () => {
-      setIsLoading(false);
-      setLoadingProgress(100);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 600);
     });
 
     anim.addEventListener("data_failed", () => {
       setIsLoading(false);
-      setLoadingProgress(0);
       console.error("Failed to load animation");
     });
-
-    anim.addEventListener("DOMLoaded", () => {
-      setLoadingProgress(50);
-    });
-
-    // Simulate progress during loading
-    let progressInterval: NodeJS.Timeout;
-    if (isLoading) {
-      progressInterval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          if (prev >= 90) return prev; // Cap at 90% until fully loaded
-          return Math.min(prev + Math.random() * 10, 90);
-        });
-      }, 200);
-    }
-
-    setAnimation(anim);
 
     const handleScroll = () => {
       if (anim) {
@@ -71,55 +127,89 @@ const LottieScrollAnimation: React.FC = () => {
       }
     };
 
-    const handleResize = () => {
-      window.dispatchEvent(new Event("resize"));
-    };
+    const unsubscribeProgress = scrollYProgress.on("change", handleScroll);
 
-    window.addEventListener("resize", handleResize);
-    const unsubscribe = scrollYProgress.on("change", handleScroll);
+    let progressInterval: NodeJS.Timeout;
+    if (isLoading) {
+      progressInterval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 90) return prev;
+          return Math.min(prev + 1, 90);
+        });
+      }, 50);
+    }
 
     return () => {
-      anim?.destroy();
-      window.removeEventListener("resize", handleResize);
-      unsubscribe();
-      clearInterval(progressInterval);
+      anim.destroy();
+      unsubscribeProgress();
+      if (progressInterval) clearInterval(progressInterval);
     };
   }, [scrollYProgress]);
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-[1100vh] w-screen relative bg-[#1a1a1a]"
-    >
-      <div className="h-[50vh]" />
+    <>
+      <div
+        ref={containerRef}
+        className="min-h-[1100vh] w-screen relative bg-[#1a1a1a]"
+      >
+        <div className="h-[50vh]" />
 
-      {/* Loading Progress */}
-      {isLoading && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 z-20 flex flex-col gap-2">
-          <Progress
-            size="md"
-            radius="sm"
-            value={loadingProgress}
-            color="primary"
-            aria-label="Loading animation..."
-            className="max-w-md"
-            showValueLabel={true}
-            classNames={{
-              base: "max-w-md",
-              labelWrapper: "text-gray-400",
-              value: "text-gray-400",
-            }}
-          />
-        </div>
-      )}
+        {isLoading && (
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 z-20">
+            <Progress
+              size="md"
+              radius="sm"
+              value={loadingProgress}
+              color="primary"
+              aria-label="Loading animation..."
+              showValueLabel={true}
+              classNames={{
+                base: "max-w-md",
+                labelWrapper: "text-gray-400",
+                value: "text-gray-400",
+              }}
+            />
+          </div>
+        )}
 
-      <motion.div
-        ref={lottieContainerRef}
-        className={`fixed w-full h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 ${
-          isLoading ? "opacity-0" : "opacity-100"
-        } transition-opacity duration-300`}
-      />
-    </div>
+        <motion.div
+          ref={lottieContainerRef}
+          className={`fixed w-full h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 
+            ${showFinalContent ? "opacity-0" : "opacity-100"} 
+            transition-opacity duration-300`}
+        />
+
+        {showFinalContent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-[#E91E63] z-20"
+          >
+            <div className="max-w-3xl px-4 text-center">
+              <h1 className="text-white font-ztNeueRalewe font-extrabold italic text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6">
+                Join The Celebration
+              </h1>
+
+              <p className="text-white text-lg sm:text-xl md:text-2xl mb-12">
+                Become a part of the story that continues
+                <br />
+                to inspire generations.
+              </p>
+
+              <Button
+                radius="sm"
+                onPress={() => router.push("/postgreetings")}
+                className="bg-[#923545] hover:bg-[#7D2D3B] text-white px-8 py-4 text-lg transition-colors"
+              >
+                Send Your Best Wishes
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </div>
+      <NoiseOverlay />
+    </>
   );
 };
 
