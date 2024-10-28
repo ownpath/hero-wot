@@ -8,58 +8,60 @@ import { useRouter } from "next/router";
 const NoiseOverlay = () => (
   <>
     <div className="noise-overlay" />
-    <style jsx global>{`
-      .noise-overlay {
-        content: "";
-        z-index: 50;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        opacity: 0.5;
-        background: url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp);
-        background-repeat: repeat;
-        background-size: auto;
-        animation: noise 100ms infinite;
-        mix-blend-mode: multiply;
-      }
+    <style>
+      {`
+        .noise-overlay {
+          content: "";
+          z-index: 50;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          opacity: 0.5;
+          background: url(https://herdl.com/wp-content/uploads/2020/11/noise-web.webp);
+          background-repeat: repeat;
+          background-size: auto;
+          animation: noise 100ms infinite;
+          mix-blend-mode: multiply;
+        }
 
-      @keyframes noise {
-        0%,
-        100% {
-          background-position: 0% 0%;
+        @keyframes noise {
+          0%,
+          100% {
+            background-position: 0% 0%;
+          }
+          10% {
+            background-position: -5% -10%;
+          }
+          20% {
+            background-position: -15% 5%;
+          }
+          30% {
+            background-position: 7% -25%;
+          }
+          40% {
+            background-position: 20% 25%;
+          }
+          50% {
+            background-position: -25% 10%;
+          }
+          60% {
+            background-position: 15% 5%;
+          }
+          70% {
+            background-position: 0% 15%;
+          }
+          80% {
+            background-position: 25% 35%;
+          }
+          90% {
+            background-position: -10% 10%;
+          }
         }
-        10% {
-          background-position: -5% -10%;
-        }
-        20% {
-          background-position: -15% 5%;
-        }
-        30% {
-          background-position: 7% -25%;
-        }
-        40% {
-          background-position: 20% 25%;
-        }
-        50% {
-          background-position: -25% 10%;
-        }
-        60% {
-          background-position: 15% 5%;
-        }
-        70% {
-          background-position: 0% 15%;
-        }
-        80% {
-          background-position: 25% 35%;
-        }
-        90% {
-          background-position: -10% 10%;
-        }
-      }
-    `}</style>
+      `}
+    </style>
   </>
 );
 
