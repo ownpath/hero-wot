@@ -200,9 +200,12 @@ const LottieScrollAnimation: React.FC = () => {
               </p>
 
               <Button
-                radius="sm"
-                onPress={() => router.push("/postgreetings")}
-                className="bg-[#923545] hover:bg-[#7D2D3B] text-white px-8 py-4 text-lg transition-colors"
+                radius="none"
+                onPress={() => router.push("/postgreeting")}
+                className="bg-hourglass rounded-[4px] text-[13px] w-[220px] h-[48px] px-8 py-3
+                      sm:text-[14px] sm:w-[230px] sm:h-[50px]
+                      md:text-[14px] md:w-[240px] md:h-[52px]
+                      lg:text-[14px] lg:w-[248px] lg:h-[54px] lg:px-10 lg:py-4"
               >
                 Send Your Best Wishes
               </Button>
