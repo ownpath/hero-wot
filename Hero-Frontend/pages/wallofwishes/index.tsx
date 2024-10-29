@@ -8,13 +8,11 @@ import { Toaster } from "sonner";
 
 export default function Masonry() {
   return (
-    <AdminGuard>
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="pt-32">
-          <PostsMasonryLayout />
-        </div>
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="pt-32">
+        <PostsMasonryLayout />
       </div>
-    </AdminGuard>
+    </div>
   );
 }
