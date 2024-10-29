@@ -28,7 +28,7 @@ function getRemainingTime() {
   const difference = targetDate.getTime() - now.getTime();
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
 
-  return days;
+  return Math.max(0, days);
 }
 
 const CombinedHourglass = () => {
