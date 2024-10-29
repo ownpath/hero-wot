@@ -5,11 +5,22 @@ import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/router";
 
-const NoiseOverlay = () => (
-  <>
-    <div className="noise-overlay" />
-    <style>
-      {`
+const NoiseOverlay = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="noise-overlay" />
+      <style>
+        {`
         .noise-overlay {
           content: "";
           z-index: 50;
@@ -61,9 +72,10 @@ const NoiseOverlay = () => (
           }
         }
       `}
-    </style>
-  </>
-);
+      </style>
+    </>
+  );
+};
 
 interface AnimationInstance {
   addEventListener: any;
@@ -107,7 +119,7 @@ const LottieScrollAnimation: React.FC = () => {
       renderer: "svg",
       loop: false,
       autoplay: false,
-      path: "/danceHover7.json",
+      path: "/data.json",
     }) as AnimationInstance;
 
     anim.addEventListener("data_ready", () => {
