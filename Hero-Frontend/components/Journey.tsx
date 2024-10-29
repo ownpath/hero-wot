@@ -186,7 +186,7 @@ const LottieScrollAnimation: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-[#E91E63] z-20"
+            className="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-[#F52A61] z-20"
           >
             <div className="max-w-3xl px-4 text-center">
               <h1 className="text-white font-ztNeueRalewe font-extrabold italic text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6">
@@ -201,13 +201,13 @@ const LottieScrollAnimation: React.FC = () => {
 
               <Button
                 radius="none"
-                onPress={() => router.push("/postgreeting")}
-                className="bg-hourglass rounded-[4px] text-[13px] w-[220px] h-[48px] px-8 py-3
+                onPress={() => router.push("/wallofwishes")}
+                className="bg-[#FDC500] text-black font-semibold rounded-[4px] text-[13px] w-[220px] h-[48px] px-8 py-3
                       sm:text-[14px] sm:w-[230px] sm:h-[50px]
                       md:text-[14px] md:w-[240px] md:h-[52px]
                       lg:text-[14px] lg:w-[248px] lg:h-[54px] lg:px-10 lg:py-4"
               >
-                Send Your Best Wishes
+                Explore The Wall
               </Button>
             </div>
           </motion.div>

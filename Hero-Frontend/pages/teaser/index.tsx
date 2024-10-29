@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import HourglassAnimation from "./animehome";
+import HourglassAnimation from "../animehome";
 import { useRouter } from "next/router";
 import { Button } from "@nextui-org/button";
 import HourglassContainer from "@/components/HourglassContainer";
@@ -284,19 +284,3 @@ const CombinedHourglass = () => {
 };
 
 export default CombinedHourglass;
-
-// import React from "react";
-
-// import LottieScrollAnimation from "@/components/Journey";
-// import DefaultLayout from "@/layouts/default";
-// import AdminGuard from "@/components/AdminGuard";
-
-// export default function LoginPage() {
-//   return (
-//     <div className="flex items-center justify-center h-full w-full">
-//
-//         <LottieScrollAnimation />
-//
-//     </div>
-//   );
-// }

@@ -230,7 +230,7 @@ const MediaDisplay = React.memo(
                   </Skeleton>
                 </div>
               ) : (
-                <div className="relative w-full">
+                <div className="relative w-full object-contain">
                   <Skeleton
                     isLoaded={!videoLoading}
                     className="w-full rounded-lg"
@@ -238,7 +238,7 @@ const MediaDisplay = React.memo(
                     <video
                       controls
                       autoPlay
-                      className="w-full"
+                      className="w-full object-contain"
                       onLoadedData={() => setVideoLoading(false)}
                       style={{ backgroundColor: "transparent" }}
                     >
@@ -282,7 +282,7 @@ const PostCard: React.FC<PostCardProps> = React.memo(
                 <h3 className="font-ztNeueRalewe italic text-2xl font-bold text-masonryCardText mb-2">
                   {post.author?.first_name} {post.author?.last_name}
                 </h3>
-                <p className="text-xs  mb-8">
+                <p className="text-xs font-semibold text-masonryCardText mb-6">
                   {post.author?.designation
                     ? `${formatUserType(post.author?.user_type)}/${post.author.designation}`
                     : formatUserType(post.author?.user_type as string)}
@@ -439,6 +439,7 @@ const PostsMasonryLayout: React.FC = () => {
         size="3xl"
         scrollBehavior="inside"
         backdrop="blur"
+        className="bg-masonryCardColor"
       >
         <ModalContent className="w-full">
           {(onClose) => (
@@ -465,7 +466,9 @@ const PostsMasonryLayout: React.FC = () => {
                   </>
                 )}
 
-                <p className="font-sans mt-4">{selectedPost?.body}</p>
+                <p className="font-sans mt-4 text-masonryCardText">
+                  {selectedPost?.body}
+                </p>
               </ModalBody>
               <ModalFooter>
                 <Button
