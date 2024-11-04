@@ -151,6 +151,91 @@ class UserService {
   async revokeRefreshToken(userId) {
     return UserModel.update({ refreshToken: null }, { where: { id: userId } });
   }
+
+  // In userService.js - searchUsers method
+  async searchUsers({
+    query = "",
+    limit = 10,
+    offset = 0,
+    sortBy = "id",
+    sortOrder = "asc",
+  }) {
+    try {
+      console.log("Service received params:", {
+        query,
+        limit,
+        offset,
+        sortBy,
+        sortOrder,
+      });
+
+      // Validate sortBy field exists in model
+      const validFields = Object.keys(UserModel.rawAttributes);
+      const validatedSortBy = validFields.includes(sortBy) ? sortBy : "id";
+
+      // Construct where clause
+      const whereClause = {};
+      if (query.trim()) {
+        whereClause[Op.or] = [
+          { first_name: { [Op.iLike]: `%${query}%` } },
+          { last_name: { [Op.iLike]: `%${query}%` } },
+          { email: { [Op.iLike]: `%${query}%` } },
+        ];
+      }
+
+      console.log("Final where clause:", whereClause);
+
+      const { count, rows } = await UserModel.findAndCountAll({
+        where: whereClause,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [[validatedSortBy, sortOrder.toUpperCase()]],
+        attributes: {
+          exclude: [
+            "password",
+            "refresh_token",
+            "email_confirmation_otp",
+            "email_confirmation_otp_expires",
+          ],
+        },
+      });
+
+      console.log(`Found ${count} results`);
+
+      return {
+        users: rows,
+        total: count,
+      };
+    } catch (error) {
+      console.error("Service error:", error);
+      throw error;
+    }
+  }
+
+  async getSearchSuggestions({ query, limit }) {
+    try {
+      const users = await UserModel.findAll({
+        where: {
+          [Op.or]: [
+            { first_name: { [Op.iLike]: `%${query}%` } },
+            { last_name: { [Op.iLike]: `%${query}%` } },
+            { email: { [Op.iLike]: `%${query}%` } },
+          ],
+        },
+        limit: parseInt(limit),
+        attributes: ["id", "first_name", "last_name", "email"],
+        order: [["first_name", "ASC"]],
+      });
+
+      return users.map((user) => ({
+        id: user.id,
+        text: `${user.first_name} ${user.last_name} (${user.email})`,
+      }));
+    } catch (error) {
+      console.error("Error in getSearchSuggestions:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new UserService();

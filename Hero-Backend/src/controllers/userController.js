@@ -114,6 +114,80 @@ class UserController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async searchUsers(req, res) {
+    try {
+      // Log incoming request query for debugging
+      console.log("Raw query params:", req.query);
+
+      // Parse and validate query parameters
+      const query = req.query.query || "";
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+      const offset = (page - 1) * limit;
+      const sortBy = req.query.sortBy || "id";
+      const sortOrder = req.query.sortOrder || "asc";
+
+      console.log("Processed parameters:", {
+        query,
+        page,
+        limit,
+        offset,
+        sortBy,
+        sortOrder,
+      });
+
+      // Perform the search
+      const result = await UserService.searchUsers({
+        query,
+        limit,
+        offset,
+        sortBy,
+        sortOrder,
+      });
+
+      // Format response
+      const response = {
+        items: result.users,
+        pagination: {
+          total: result.total,
+          page,
+          limit,
+          totalPages: Math.ceil(result.total / limit),
+        },
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("Search error:", error);
+      res.status(500).json({
+        error: error.message || "Error performing user search",
+      });
+    }
+  }
+
+  async getSearchSuggestions(req, res) {
+    try {
+      const { query = "", limit = 5 } = req.query;
+      const parsedLimit = Math.min(parseInt(limit) || 5, 20); // Max 20 suggestions
+
+      if (!query.trim()) {
+        return res.json({ suggestions: [] });
+      }
+
+      const suggestions = await UserService.getSearchSuggestions({
+        query: query.toString().trim(),
+        limit: parsedLimit,
+      });
+
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Error getting search suggestions:", error);
+      res.status(500).json({
+        error: error.message || "Error fetching search suggestions",
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

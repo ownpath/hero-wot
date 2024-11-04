@@ -20,6 +20,25 @@ class PostController {
     }
   }
 
+  async createPostByAdmin(req, res) {
+    try {
+      const { id, body, status, score, media } = req.body;
+      const userId = id;
+
+      // media is already an array, no need to parse it
+      const post = await PostService.createPost({
+        body,
+        userId,
+        status,
+        score,
+        media,
+      });
+      res.status(201).json(post);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async getPostById(req, res) {
     try {
       const id = parseInt(req.params.id, 10);
@@ -44,6 +63,26 @@ class PostController {
       });
       res.json(posts);
     } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getAcceptedPosts(req, res) {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+      const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+
+      // Log incoming request parameters
+      console.log("Incoming request parameters:", { limit, offset });
+
+      const posts = await PostService.getAcceptedPosts({
+        limit,
+        offset,
+      });
+
+      res.json(posts);
+    } catch (error) {
+      console.error("Error in getAcceptedPosts:", error);
       res.status(500).json({ error: error.message });
     }
   }
