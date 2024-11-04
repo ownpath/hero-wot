@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   Tabs,
   Tab,
@@ -14,6 +14,7 @@ import {
   useDisclosure,
   Divider,
   Slider,
+  Input,
 } from "@nextui-org/react";
 import {
   useInfiniteQuery,
@@ -23,7 +24,8 @@ import {
 import { toast } from "sonner";
 import authenticatedRequest from "@/config/authenticatedRequest";
 
-import { Image, Play } from "lucide-react";
+import { Image, Play, Search } from "lucide-react";
+import AdminBirthdayGreetingsForm from "./AdminGreetingsForm";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -63,6 +65,8 @@ interface User {
   last_name: string;
   email: string;
   role: string;
+  designation: string;
+  user_type: string;
 }
 
 interface PostsApiResponse {
@@ -75,6 +79,38 @@ interface UsersApiResponse {
   users: User[];
   totalCount: number;
   nextOffset: number | null;
+}
+
+interface UserSearchResponse {
+  items: User[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  filters: any;
+  sort: {
+    field: string;
+    order: string;
+  };
+}
+
+// Custom debounce function
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }
 
 const getMediaType = (mediaItem: Post["media"][0]): "image" | "video" => {
@@ -215,6 +251,19 @@ const updatePostStatus = async ({
   }
 };
 
+const searchUsers = async (query: string): Promise<UserSearchResponse> => {
+  const response = await authenticatedRequest({
+    method: "GET",
+    url: "/users/search",
+    params: {
+      query,
+      limit: 10,
+      page: 1,
+    },
+  });
+  return response.data;
+};
+
 const usePostQuery = (status: Post["status"]) => {
   return useInfiniteQuery({
     queryKey: ["posts", status],
@@ -229,6 +278,9 @@ const AdminManagementTabs: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const queryClient = useQueryClient();
   const intObserver = useRef<IntersectionObserver | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Post queries
   const processingQuery = usePostQuery("processing");
@@ -329,7 +381,94 @@ const AdminManagementTabs: React.FC = () => {
     [usersQuery]
   );
 
+  // Use debounced search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Add search mutation
+  const searchMutation = useMutation({
+    mutationFn: searchUsers,
+    onSuccess: (data) => {
+      setSearchResults(data.items);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to search users");
+    },
+    onSettled: () => {
+      setIsSearching(false);
+    },
+  });
+
+  // Effect to handle search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery.trim()) {
+      setIsSearching(true);
+      searchMutation.mutate(debouncedSearchQuery);
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedSearchQuery]);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
   // Render functions
+
+  // Add search results renderer
+  const renderSearchResults = () => {
+    if (isSearching) {
+      return <div className="mt-4">Searching...</div>;
+    }
+
+    if (searchResults.length === 0 && searchQuery.trim()) {
+      return <div className="mt-4">No users found</div>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-4 mt-4">
+        {searchResults.map((user) => (
+          <Card key={user.id} className="w-full bg-white">
+            <CardBody>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-semibold text-black">
+                      {user.first_name} {user.last_name}
+                    </h3>
+                    <p className="text-sm text-gray-600">ID: {user.id}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="mt-2">
+                  <p className="text-gray-700">
+                    <span className="font-medium">Email:</span> {user.email}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Role:</span> {user.role}
+                  </p>
+                  {user.designation && (
+                    <p className="text-gray-700">
+                      <span className="font-medium">Designation:</span>{" "}
+                      {user.designation}
+                    </p>
+                  )}
+                  {user.user_type && (
+                    <p className="text-gray-700">
+                      <span className="font-medium">User Type:</span>{" "}
+                      {user.user_type}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   const renderPostCards = (status: Post["status"]) => {
     const query =
       status === "processing"
@@ -519,9 +658,22 @@ const AdminManagementTabs: React.FC = () => {
                 </Tab>
               </Tabs>
             </Tab>
-            {/* <Tab key="users" title="Users">
-              <div className="mt-4">{renderUserCards()}</div>
-            </Tab> */}
+            <Tab key="search" title="Search Users">
+              <div className="mt-4">
+                <Input
+                  value={searchQuery}
+                  onValueChange={handleSearchChange}
+                  placeholder="Search users by name, email, or role..."
+                  startContent={<Search className="text-black" size={20} />}
+                  className="max-w-md"
+                  size="lg"
+                />
+                {renderSearchResults()}
+              </div>
+            </Tab>
+            <Tab key="create" title="Create Post">
+              <AdminBirthdayGreetingsForm />
+            </Tab>
           </Tabs>
         </CardBody>
       </Card>
