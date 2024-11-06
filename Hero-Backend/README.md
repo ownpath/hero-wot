@@ -316,3 +316,211 @@ Remember to always backup your database before making significant changes or run
 ```
 
 ```
+
+# Express.js Server and Database Migration Guide
+
+## Table of Contents
+
+- [Express.js Server Setup](#expressjs-server-setup)
+- [Database Setup](#database-setup)
+- [GCP Deployment Configuration](#gcp-deployment-configuration)
+
+## Express.js Server Setup
+
+### Prerequisites
+
+- Node.js and npm installed
+- Git installed (optional)
+- PostgreSQL database set up and running
+
+### Local Development Setup
+
+1. Clone the repository:
+
+```bash
+git clone <your-repository-url>
+cd <your-project-directory>
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file:
+
+```env
+PORT=8080
+DATABASE_URL=postgres://username:password@localhost:5432/your_database_name
+```
+
+4. Start the server:
+
+```bash
+npm start
+# or for development
+npm run dev
+```
+
+### Verify Setup
+
+Test using cURL or Postman:
+
+```bash
+curl http://localhost:8080
+```
+
+## Database Setup
+
+### Method 1: Using Sequelize Migrations
+
+1. Install required packages:
+
+```bash
+npm install sequelize pg pg-hstore
+npm install --save-dev sequelize-cli
+```
+
+2. Initialize Sequelize:
+
+```bash
+npx sequelize-cli init
+```
+
+3. Update `config/config.json`:
+
+```json
+{
+  "development": {
+    "username": "your_username",
+    "password": "your_password",
+    "database": "your_database_name",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
+```
+
+4. Run migrations:
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+### Method 2: Using Raw SQL Files
+
+1. Connect to PostgreSQL:
+
+```bash
+psql -U your_username -d your_database_name
+```
+
+2. Execute SQL files:
+
+```sql
+\i path/to/create_users_table.sql
+\i path/to/create_posts_table.sql
+```
+
+3. Verify setup:
+
+```sql
+\dt
+\d users
+\d posts
+```
+
+## GCP Deployment Configuration
+
+Create `app.yaml` in your project root:
+
+```yaml
+runtime: nodejs20
+instance_class: F2
+env: standard
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  target_throughput_utilization: 0.6
+
+env_variables:
+  NODE_ENV: "production"
+  DB_USER: "<DB USERNAME>"
+  DB_PASSWORD: "<db-password>"
+  DB_NAME: "<db-name>"
+  INSTANCE_CONNECTION_NAME: "<db-name:gcp-server-location:db-name>"
+  DATABASE_URL: "<connection url from gcp>"
+  PORT: "8080"
+  JWT_SECRET: "<STRONG_SECRET_KEY>"
+  GOOGLE_CLIENT_ID: "<client-id.apps.googleusercontent.com>"
+  GOOGLE_CLIENT_SECRET: "<Secret_key>"
+  GOOGLE_CLOUD_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\n<your-key-here>\n-----END PRIVATE KEY-----\n"
+  GOOGLE_CLIENT_EMAIL: "<username@project-name.iam.gserviceaccount.com>"
+  GOOGLE_CLOUD_PROJECT: "<project-name-in-google-cloud>"
+  FRONTEND_URL: "<http://your-frontend-url>"
+  FIRST_ADMIN_EMAIL: "<admin-email>"
+  MAILGUN_API_KEY: "<mailgun-api-key>"
+  MAILGUN_DOMAIN: "<mailgun-domain>"
+  MAILGUN_SENDING_DOMAIN: "<mailgun-sending-domain>"
+  MAILGUN_URL: "https://api.mailgun.net"
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+network:
+  session_affinity: true
+
+readiness_check:
+  app_start_timeout_sec: 300
+
+liveness_check:
+  initial_delay_sec: 300
+
+beta_settings:
+  cloud_sql_instances: "<your-cloud-sql-instance>"
+```
+
+### Important Notes:
+
+1. Replace all values in `<>` with your actual configuration values
+2. Keep sensitive information secure and never commit them to version control
+3. Use environment variables for local development
+4. The cloud_sql_instances value can be found in your GCP Console
+
+### Troubleshooting Common Issues
+
+1. Database Connection:
+
+   - Verify connection string format
+   - Check network/firewall settings
+   - Verify instance connection name
+
+2. Deployment Failures:
+
+   - Check app.yaml syntax
+   - Verify all environment variables are set
+   - Check Cloud Build logs
+
+3. Runtime Errors:
+   - Monitor application logs
+   - Verify environment variables
+   - Check service account permissions
+
+### Post-Deployment Verification
+
+1. Check application logs in GCP Console
+2. Verify database connectivity
+3. Test all API endpoints
+4. Monitor resource usage
+5. Verify SSL/HTTPS configuration
+
+For additional help:
+
+- GCP Documentation: https://cloud.google.com/docs
+- Express.js Documentation: https://expressjs.com/
+- Sequelize Documentation: https://sequelize.org/
