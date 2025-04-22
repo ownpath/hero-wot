@@ -6,7 +6,7 @@ const { Pool } = require('pg');
 const POSTGRES_URL = process.env.DATABASE_URL;
 
 // Sequelize setup
-const sequelize = new Sequelize(POSTGRES_URL);
+const sequelize = new Sequelize(POSTGRES_URL, { dialect: 'postgres' });
 
 // pg Pool setup
 const pool = new Pool({
